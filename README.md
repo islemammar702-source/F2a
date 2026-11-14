@@ -66,6 +66,18 @@ cp .env.example .env        # renseigner POSTGRES_PASSWORD, SECRET_KEY, ADMIN_PA
 docker compose up -d --build
 ```
 
+### Mise en ligne sur un serveur (VPS) avec HTTPS
+
+1. Chez le vendeur du domaine, créez un enregistrement **A** `f2a-travaux.com` → IP du serveur (et un **A** ou **CNAME** pour `www`).
+2. Sur le serveur (Ubuntu 24.04) :
+   ```bash
+   curl -fsSL https://get.docker.com | sh
+   git clone -b claude/f2a-manager-app-8qkc4a https://github.com/islemammar702-source/F2a.git
+   cd F2a && cp .env.example .env && nano .env   # DOMAIN, PUBLIC_URL, mots de passe forts, COOKIE_SECURE=true
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+   ```
+3. Ouvrez `https://votre-domaine.com` : Caddy obtient le certificat HTTPS automatiquement (ports 80 et 443 ouverts).
+
 La pile comprend PostgreSQL, l'API (migrations et seed automatiques au démarrage), le frontend et un service de **sauvegarde quotidienne** (`pg_dump` et archive des documents dans `./backups`, rétention configurable). Placez un reverse proxy TLS (Caddy ou Nginx) devant le port 3000 et laissez `COOKIE_SECURE=true`.
 
 ---
