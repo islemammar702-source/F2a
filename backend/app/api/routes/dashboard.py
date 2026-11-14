@@ -1,7 +1,7 @@
 """Dashboard, financial reports, global search, notifications and activity log."""
 from datetime import date, timedelta
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Body, Depends, Query
 from fastapi.responses import Response
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session
@@ -128,7 +128,7 @@ def list_notifications(unread_only: bool = False, limit: int = Query(30, ge=1, l
 
 
 @router.post("/notifications/read", status_code=204)
-def mark_read(ids: list[str] | None = None, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def mark_read(ids: list[str] | None = Body(None), db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     stmt = update(Notification).where(Notification.user_id == user.id)
     if ids:
         stmt = stmt.where(Notification.id.in_(ids))

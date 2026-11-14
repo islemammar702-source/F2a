@@ -122,6 +122,9 @@ def refresh(request: Request, response: Response, db: Session = Depends(get_db))
     now = datetime.now(timezone.utc)
     if sess is None:
         raise HTTPException(401, detail="invalid_refresh_token")
+    if sess.revoked_at is not None and sess.replaced_by is not None and (now - sess.revoked_at).total_seconds() < 10:
+        # Benign race (two tabs refreshing at the same moment): refuse without revoking the family
+        raise HTTPException(401, detail="refresh_race")
     if sess.revoked_at is not None:
         # Token reuse detected: revoke the whole session family
         db.execute(update(UserSession).where(UserSession.family_id == sess.family_id, UserSession.revoked_at.is_(None))
