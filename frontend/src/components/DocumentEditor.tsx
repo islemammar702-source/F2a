@@ -34,7 +34,7 @@ export function emptyLine(type: Line["item_type"], tva: number): Line {
 
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
-    <Card title={<span className="flex items-center gap-2"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-bold text-navy">{n}</span>{title}</span>}>
+    <Card title={<span className="flex items-center gap-2"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-accent to-flame-red text-xs font-bold text-white">{n}</span>{title}</span>}>
       {children}
     </Card>
   );

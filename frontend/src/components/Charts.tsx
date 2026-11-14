@@ -5,9 +5,9 @@ import { useI18n } from "@/lib/i18n";
 import { formatCompact, formatMoney, formatMonth, toNumber } from "@/lib/format";
 import type { Money } from "@/lib/types";
 
-const BLUE = "#174B83";
-const ORANGE = "#E9A12C";
-const PALETTE = [BLUE, ORANGE, "#2BA37A", "#7A8BA3", "#B44C4C", "#6C5BB4"];
+const BLUE = "#1A5DAB";
+const ORANGE = "#F2711C";
+const PALETTE = [BLUE, ORANGE, "#38B6F0", "#FDB022", "#2BA37A", "#7A8BA3", "#B44C4C", "#6C5BB4"];
 
 type MonthRow = { month: string; invoiced: Money; collected: Money };
 

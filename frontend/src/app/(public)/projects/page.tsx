@@ -8,8 +8,8 @@ export default function ProjectsPage() {
   return (
     <>
       <PageHero title={t("public.projectsTitle")} text={t("public.projectsText")} />
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-16 sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
-        {PROJECTS.map((p) => <ProjectCard key={p.key} p={p} />)}
+      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-20 sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
+        {PROJECTS.map((p, i) => <ProjectCard key={p.key} p={p} index={i} />)}
       </section>
       <CtaBand />
     </>

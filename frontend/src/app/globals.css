@@ -3,10 +3,26 @@
 @tailwind utilities;
 
 :root { color-scheme: light; }
-html, body { background: #F3F6FA; color: #172B45; }
+html, body { background: #F4F7FB; color: #0E2440; }
 html[dir="rtl"] body { font-family: "Cairo", "Tahoma", sans-serif; }
 html[dir="ltr"] body { font-family: "Inter", "Cairo", system-ui, sans-serif; }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 /* amounts and identifiers stay left-to-right inside Arabic text */
 .ltr-nums { direction: ltr; unicode-bidi: isolate; display: inline-block; }
 @media print { .no-print { display: none !important; } }
+
+/* ---------- F2A identity: chaud / froid · technique · épuré ---------- */
+html[dir="ltr"] h1, html[dir="ltr"] h2, html[dir="ltr"] .font-display { font-family: "Montserrat", "Inter", sans-serif; letter-spacing: -0.02em; }
+/* Ice → flame gradient (the logo's snowflake and flame) */
+.bg-thermal { background-image: linear-gradient(90deg, #1A5DAB 0%, #38B6F0 30%, #FDB022 65%, #F2711C 82%, #E8431B 100%); }
+html[dir="rtl"] .bg-thermal { background-image: linear-gradient(270deg, #1A5DAB 0%, #38B6F0 30%, #FDB022 65%, #F2711C 82%, #E8431B 100%); }
+.text-thermal { background-image: linear-gradient(90deg, #38B6F0, #FDB022 55%, #F2711C); -webkit-background-clip: text; background-clip: text; color: transparent; }
+/* Technical drawing grid (blueprint) */
+.blueprint { background-image: linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px); background-size: 36px 36px; }
+.blueprint-fine { background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 12px 12px; }
+.blueprint-light { background-image: linear-gradient(rgba(14,36,64,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(14,36,64,.045) 1px, transparent 1px); background-size: 36px 36px; }
+.mask-fade { -webkit-mask-image: radial-gradient(ellipse at center, #000 40%, transparent 78%); mask-image: radial-gradient(ellipse at center, #000 40%, transparent 78%); }
+/* Section eyebrow label: small technical caption */
+.eyebrow { display: inline-flex; align-items: center; gap: .5rem; font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.eyebrow::before { content: ""; width: 1.75rem; height: 3px; border-radius: 9999px; background: linear-gradient(90deg, #38B6F0, #F2711C); }
+html[dir="rtl"] .eyebrow { letter-spacing: 0; }

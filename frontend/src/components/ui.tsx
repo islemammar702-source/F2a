@@ -22,7 +22,7 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button(
   const v = {
     primary: "bg-brand text-white hover:bg-brand-700 shadow-sm",
     secondary: "bg-brand-50 text-brand hover:bg-brand-100",
-    accent: "bg-accent text-navy hover:bg-accent-600 hover:text-white shadow-sm",
+    accent: "bg-gradient-to-r from-accent to-flame-red text-white shadow-glow hover:brightness-110",
     danger: "bg-red-600 text-white hover:bg-red-700",
     ghost: "text-slate-600 hover:bg-slate-100",
     outline: "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
@@ -31,7 +31,7 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button(
   return (
     <button
       ref={ref}
-      className={cx("inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-60", v, s, className)}
+      className={cx("inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition active:scale-[.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-60", v, s, className)}
       disabled={disabled || loading}
       {...rest}
     >
@@ -88,7 +88,7 @@ export function Card({ children, className, title, actions, padded = true }: { c
     <section className={cx("min-w-0 rounded-2xl border border-slate-200/70 bg-white shadow-card", className)}>
       {(title || actions) && (
         <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-5 py-3.5">
-          <h2 className="text-sm font-bold text-navy">{title}</h2>
+          <h2 className="flex items-center gap-2 text-sm font-bold text-navy"><span className="h-3.5 w-1 rounded-full bg-gradient-to-b from-ice to-accent" aria-hidden />{title}</h2>
           {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
         </header>
       )}

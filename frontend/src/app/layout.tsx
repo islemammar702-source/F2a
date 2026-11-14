@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   icons: { icon: "/logo-mark.png", apple: "/logo-mark.png" },
 };
 
-export const viewport: Viewport = { themeColor: "#174B83", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#0E2440", width: "device-width", initialScale: 1 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const lang = (await cookies()).get("f2a_lang")?.value === "ar" ? "ar" : "fr";
@@ -19,7 +19,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-screen antialiased">
         <Providers lang={lang}>{children}</Providers>

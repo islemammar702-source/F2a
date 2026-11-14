@@ -68,28 +68,33 @@ function Sidebar({ open, onClose, isClient }: { open: boolean; onClose: () => vo
     <>
       {open && <div className="fixed inset-0 z-30 bg-navy/40 lg:hidden" onClick={onClose} />}
       <aside className={cx(
-        "fixed inset-y-0 start-0 z-40 flex w-64 flex-col bg-navy text-white transition-transform",
+        "fixed inset-y-0 start-0 z-40 flex w-64 flex-col overflow-hidden bg-navy text-white transition-transform",
         !open && "max-lg:ltr:-translate-x-full max-lg:rtl:translate-x-full",
       )}>
-        <div className="flex h-16 items-center justify-between px-5">
+        <div className="blueprint pointer-events-none absolute inset-0 opacity-70" />
+        <div className="pointer-events-none absolute -bottom-24 -start-20 h-64 w-64 rounded-full bg-accent opacity-20 blur-3xl" />
+        <div className="pointer-events-none absolute -top-24 -end-24 h-56 w-56 rounded-full bg-ice opacity-15 blur-3xl" />
+        <div className="bg-thermal relative h-1 shrink-0" />
+        <div className="relative flex h-[4.5rem] items-center justify-between px-5">
           <Link href={isClient ? "/portal" : "/dashboard"} onClick={onClose}><Logo light subtitle="MANAGER" /></Link>
           <button className="rounded-lg p-1 text-white/70 hover:bg-white/10 lg:hidden" onClick={onClose} aria-label="close"><X className="h-5 w-5" /></button>
         </div>
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <nav className="relative flex-1 overflow-y-auto px-3 py-4">
           {nav.map((group, gi) => {
             const items = group.items.filter((it) => !it.perm || can(it.perm));
             if (!items.length) return null;
             return (
               <div key={gi} className="mb-4">
-                {group.section && <p className="mb-1.5 px-3 text-[11px] font-bold uppercase tracking-wider text-white/40">{group.section}</p>}
+                {group.section && <p className="mb-1.5 px-3 font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-white/35">{group.section}</p>}
                 {items.map((it) => {
                   const active = pathname === it.href || (it.href !== "/portal" && pathname.startsWith(it.href + "/"));
                   return (
                     <Link key={it.href} href={it.href} onClick={onClose} className={cx(
-                      "mb-0.5 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition",
-                      active ? "bg-brand text-white shadow-inner" : "text-white/70 hover:bg-white/5 hover:text-white",
+                      "relative mb-0.5 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition",
+                      active ? "bg-white/10 text-white ring-1 ring-white/10" : "text-white/65 hover:bg-white/5 hover:text-white",
                     )}>
-                      <span className={active ? "text-accent" : ""}>{it.icon}</span>
+                      {active && <span className="absolute inset-y-2 start-0 w-1 rounded-full bg-gradient-to-b from-ice via-flame-yellow to-flame-red" />}
+                      <span className={active ? "text-flame-yellow" : ""}>{it.icon}</span>
                       {it.label}
                     </Link>
                   );
@@ -98,7 +103,7 @@ function Sidebar({ open, onClose, isClient }: { open: boolean; onClose: () => vo
             );
           })}
         </nav>
-        <div className="border-t border-white/10 p-4">
+        <div className="relative border-t border-white/10 p-4">
           <Link href="/" className="text-xs text-white/50 hover:text-white">← {t("nav.backToSite")}</Link>
         </div>
       </aside>
@@ -254,7 +259,7 @@ export default function AppShell({ children, area }: { children: ReactNode; area
     <div className="min-h-screen">
       <Sidebar open={open} onClose={() => setOpen(false)} isClient={area === "client"} />
       <div className="lg:ps-64">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200/70 bg-white/90 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200/70 bg-white/85 px-4 backdrop-blur-md sm:px-6">
           <button className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden" onClick={() => setOpen(true)} aria-label="menu"><Menu className="h-5 w-5" /></button>
           {area === "staff" ? <GlobalSearch /> : <div className="flex-1" />}
           <div className="ms-auto flex items-center gap-1">

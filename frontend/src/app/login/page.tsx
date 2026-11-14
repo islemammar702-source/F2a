@@ -57,12 +57,16 @@ function Login() {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-navy p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <div className="absolute -end-24 -top-24 h-96 w-96 rounded-full bg-brand opacity-60 blur-3xl" />
-        <div className="absolute -bottom-32 -start-16 h-80 w-80 rounded-full bg-accent opacity-25 blur-3xl" />
+        <div className="blueprint pointer-events-none absolute inset-0" />
+        <div className="pointer-events-none absolute -end-24 -top-24 h-96 w-96 rounded-full bg-ice opacity-20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -start-16 h-96 w-96 rounded-full bg-accent opacity-30 blur-3xl" />
+        <div className="bg-thermal absolute inset-x-0 top-0 h-1" />
         <Link href="/" className="relative"><Logo light /></Link>
         <div className="relative">
-          <h2 className="text-4xl font-extrabold leading-tight">{t("common.appName")}</h2>
-          <p className="mt-4 max-w-md text-white/70">{t("public.heroText")}</p>
+          <span className="eyebrow text-ice">F2A MANAGER</span>
+          <h2 className="mt-4 text-4xl font-extrabold leading-tight xl:text-5xl">{t("common.appName")}</h2>
+          <div className="bg-thermal mt-6 h-1.5 w-24 rounded-full" />
+          <p className="mt-6 max-w-md leading-relaxed text-white/65">{t("public.heroText")}</p>
         </div>
         <p className="relative flex items-center gap-2 text-sm text-white/60"><ShieldCheck className="h-4 w-4 text-accent" />{t("auth.secure")}</p>
       </div>
