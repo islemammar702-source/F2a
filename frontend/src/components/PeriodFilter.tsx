@@ -9,8 +9,8 @@ export default function PeriodFilter({ value, onChange }: { value: PeriodValue; 
   const { t } = useI18n();
   const opts = ["today", "week", "month", "year", "custom"];
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="flex gap-1 overflow-x-auto rounded-xl bg-white p-1 shadow-card ring-1 ring-slate-200/70">
+    <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
+      <div className="flex max-w-full gap-1 overflow-x-auto rounded-xl bg-white p-1 shadow-card ring-1 ring-slate-200/70">
         {opts.map((o) => (
           <button key={o} onClick={() => onChange({ ...value, period: o })} className={cx("whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold transition", value.period === o ? "bg-brand text-white" : "text-slate-500 hover:text-navy")}>
             {t(`common.${o}`)}

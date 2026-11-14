@@ -53,7 +53,7 @@ export function DonutChart({ data }: { data: { name: string; value: number }[] }
   const { lang } = useI18n();
   const total = data.reduce((s, d) => s + d.value, 0);
   return (
-    <div className="flex flex-col items-center gap-4 sm:flex-row">
+    <div className="flex flex-col items-center gap-4">
       <div className="h-48 w-48 shrink-0" dir="ltr">
         <ResponsiveContainer>
           <PieChart>

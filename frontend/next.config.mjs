@@ -11,6 +11,7 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  output: "standalone",
   // The browser only talks to Next.js; /api/* is proxied to FastAPI (same origin → httpOnly refresh cookie works).
   async rewrites() {
     return [{ source: "/api/:path*", destination: `${BACKEND_URL}/api/:path*` }];

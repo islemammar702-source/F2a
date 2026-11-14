@@ -267,6 +267,8 @@ def test_public_forms_and_notifications(client, manager):
     assert reqs["total"] == 1
     notes = client.get("/api/notifications", headers=manager).json()
     assert notes["unread"] >= 1 and notes["items"][0]["type"] == "request.created"
+    first = notes["items"][0]["id"]
+    assert client.post("/api/notifications/read", json=[first], headers=manager).status_code == 204
     client.post("/api/notifications/read", headers=manager)
     assert client.get("/api/notifications", headers=manager).json()["unread"] == 0
 

@@ -85,7 +85,7 @@ export function Checkbox({ label, checked, onChange, disabled }: { label: ReactN
 
 export function Card({ children, className, title, actions, padded = true }: { children: ReactNode; className?: string; title?: ReactNode; actions?: ReactNode; padded?: boolean }) {
   return (
-    <section className={cx("rounded-2xl border border-slate-200/70 bg-white shadow-card", className)}>
+    <section className={cx("min-w-0 rounded-2xl border border-slate-200/70 bg-white shadow-card", className)}>
       {(title || actions) && (
         <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-5 py-3.5">
           <h2 className="text-sm font-bold text-navy">{title}</h2>

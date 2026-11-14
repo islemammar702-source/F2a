@@ -204,12 +204,12 @@ export default function DocumentEditor({
                   <Field label={`${t("lines.discount")} (DT)`} className="md:col-span-2" error={errors[`r${i}`]}>
                     <Input type="number" inputMode="decimal" step="0.001" min="0" dir="ltr" value={String(l.discount)} disabled={lockClientAndItems} onChange={(e) => setLine(i, { discount: e.target.value })} />
                   </Field>
-                  <Field label={t("lines.tva")} className="md:col-span-1">
+                  <Field label={t("lines.tva")} className="md:col-span-2">
                     <Select value={String(toNumber(l.tva_rate))} disabled={lockClientAndItems} onChange={(e) => setLine(i, { tva_rate: e.target.value })}>
                       {Array.from(new Set([...rates, toNumber(l.tva_rate)])).sort((a, b) => a - b).map((r) => <option key={r} value={String(r)}>{r}</option>)}
                     </Select>
                   </Field>
-                  <div className="col-span-2 flex flex-col justify-end text-end md:col-span-3">
+                  <div className="col-span-2 flex flex-col justify-end text-end md:col-span-2">
                     <span className="text-xs text-slate-500">{t("lines.totalHt")} / {t("lines.totalTtc")}</span>
                     <span className="text-sm font-bold tabular-nums text-navy">{formatMoney(lt.ht, lang)} <span className="font-normal text-slate-400">/</span> {formatMoney(lt.ttc, lang)}</span>
                   </div>

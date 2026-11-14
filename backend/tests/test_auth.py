@@ -1,3 +1,10 @@
+from datetime import datetime, timedelta, timezone
+
+from sqlalchemy import update
+
+from app.core.security import hash_token
+from app.db.session import SessionLocal
+from app.models import UserSession
 from tests.conftest import PASSWORDS, login
 
 
@@ -36,7 +43,14 @@ def test_refresh_rotation_and_reuse_detection(client):
     assert r.status_code == 200
     new = client.cookies.get("f2a_refresh")
     assert new and new != old
-    # replay of the old token → whole family revoked
+    # immediate replay (two tabs refreshing together) → refused, family kept
+    client.cookies.set("f2a_refresh", old, path="/api/auth")
+    assert client.post("/api/auth/refresh").json()["detail"] == "refresh_race"
+    # later replay of the old token → theft suspected: whole family revoked
+    with SessionLocal() as db:
+        db.execute(update(UserSession).where(UserSession.token_hash == hash_token(old))
+                   .values(revoked_at=datetime.now(timezone.utc) - timedelta(minutes=5)))
+        db.commit()
     client.cookies.set("f2a_refresh", old, path="/api/auth")
     assert client.post("/api/auth/refresh").json()["detail"] == "refresh_token_reused"
     client.cookies.set("f2a_refresh", new, path="/api/auth")

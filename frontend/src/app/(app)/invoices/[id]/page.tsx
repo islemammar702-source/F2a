@@ -168,7 +168,7 @@ function InvoiceDetail() {
                   {inv.payments.map((p) => (
                     <li key={p.id} className={`flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-sm ${p.status === "cancelled" ? "opacity-60" : ""}`}>
                       <div>
-                        <div className="font-semibold text-navy">{p.number} · {formatDate(p.payment_date, lang)}</div>
+                        <div className="font-semibold text-navy"><span className="ltr-nums">{p.number}</span> · <span className="ltr-nums">{formatDate(p.payment_date, lang)}</span></div>
                         <div className="text-xs text-slate-500">{methodLabel(p.method)}{p.reference ? ` · ${p.reference}` : ""}{p.comment ? ` · ${p.comment}` : ""}</div>
                         {p.cancel_reason && <div className="text-xs text-red-600">{t("common.reason")} : {p.cancel_reason}</div>}
                       </div>

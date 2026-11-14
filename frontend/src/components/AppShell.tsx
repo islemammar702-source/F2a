@@ -68,8 +68,8 @@ function Sidebar({ open, onClose, isClient }: { open: boolean; onClose: () => vo
     <>
       {open && <div className="fixed inset-0 z-30 bg-navy/40 lg:hidden" onClick={onClose} />}
       <aside className={cx(
-        "fixed inset-y-0 start-0 z-40 flex w-64 flex-col bg-navy text-white transition-transform lg:translate-x-0",
-        open ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full",
+        "fixed inset-y-0 start-0 z-40 flex w-64 flex-col bg-navy text-white transition-transform",
+        !open && "max-lg:ltr:-translate-x-full max-lg:rtl:translate-x-full",
       )}>
         <div className="flex h-16 items-center justify-between px-5">
           <Link href={isClient ? "/portal" : "/dashboard"} onClick={onClose}><Logo light subtitle="MANAGER" /></Link>
