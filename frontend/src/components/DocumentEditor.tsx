@@ -109,6 +109,8 @@ export default function DocumentEditor({
     setErrors(errs);
     if (Object.keys(errs).length) {
       toast.error(new Error("validation"));
+      // Bring the first invalid field into view (the form is long and the save button is at the bottom)
+      setTimeout(() => document.querySelector("[data-field-error]")?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
       return;
     }
     onSubmit(v);
@@ -160,7 +162,7 @@ export default function DocumentEditor({
 
       <Step n={3} title={t("quotes.step3")}>
         {lockClientAndItems && <p className="mb-3 rounded-lg bg-accent-50 px-3 py-2 text-sm text-accent-600">{t("invoices.restrictedEdit")}</p>}
-        {errors.items && <p className="mb-3 text-sm text-red-600">{errors.items}</p>}
+        {errors.items && <p data-field-error className="mb-3 text-sm text-red-600">{errors.items}</p>}
         <div className="space-y-3">
           {v.items.map((l, i) => {
             const lt = lineTotals(l);

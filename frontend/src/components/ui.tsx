@@ -51,7 +51,7 @@ export function Field({ label, error, hint, children, required, className }: { l
       )}
       {children}
       {hint && !error && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}
-      {error && <span className="mt-1 block text-xs text-red-600">{error}</span>}
+      {error && <span data-field-error className="mt-1 block text-xs text-red-600">{error}</span>}
     </label>
   );
 }

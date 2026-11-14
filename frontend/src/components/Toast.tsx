@@ -50,6 +50,7 @@ export function errorMessage(err: unknown, t: (k: string) => string): string {
       return msg;
     }
   }
+  if (err instanceof Error && err.message === "validation") return t("errors.form_invalid");
   return t("common.error");
 }
 

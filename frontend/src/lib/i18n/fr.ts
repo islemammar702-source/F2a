@@ -207,7 +207,7 @@ const fr = {
     file_type_not_allowed: "Type de fichier non autorisé.", file_too_large: "Fichier trop volumineux.", default_rate_not_in_list: "Le taux par défaut doit figurer dans la liste.",
     duplicate_payment_method: "Codes de mode de paiement en double.", quote_not_pending: "Ce devis n'est plus en attente de réponse.",
     total_below_payments: "Le total ne peut pas être inférieur aux paiements déjà reçus.", integrity_error: "Conflit de données. Rechargez la page.",
-    network: "Impossible de joindre le serveur.", session_expired: "Votre session a expiré.", invalid_submission: "Envoi invalide.",
+    network: "Impossible de joindre le serveur.", form_invalid: "Formulaire incomplet : vérifiez les champs signalés en rouge (client, objet, lignes…).", session_expired: "Votre session a expiré.", invalid_submission: "Envoi invalide.",
   } as Record<string, string>,
   portal: {
     welcome: "Bonjour {name}", subtitle: "Retrouvez vos devis, factures et paiements F2A TRAVAUX.", pendingQuotes: "Devis à valider",

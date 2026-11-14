@@ -209,7 +209,7 @@ const ar: Dict = {
     file_type_not_allowed: "نوع الملف غير مسموح به.", file_too_large: "الملف كبير جدًا.", default_rate_not_in_list: "يجب أن تكون النسبة الافتراضية ضمن القائمة.",
     duplicate_payment_method: "رموز طرق الدفع مكررة.", quote_not_pending: "هذا العرض لم يعد في انتظار الرد.",
     total_below_payments: "لا يمكن أن يكون المجموع أقل من الدفوعات المقبوضة.", integrity_error: "تعارض في البيانات. أعد تحميل الصفحة.",
-    network: "تعذّر الاتصال بالخادم.", session_expired: "انتهت صلاحية جلستك.", invalid_submission: "إرسال غير صالح.",
+    network: "تعذّر الاتصال بالخادم.", form_invalid: "الاستمارة غير مكتملة: يرجى التحقق من الحقول المشار إليها باللون الأحمر (الحريف، الموضوع، الأسطر…).", session_expired: "انتهت صلاحية جلستك.", invalid_submission: "إرسال غير صالح.",
   },
   portal: {
     welcome: "مرحبًا {name}", subtitle: "اطّلع على عروض الأسعار والفواتير والدفوعات الخاصة بك لدى F2A للأشغال.", pendingQuotes: "عروض في انتظار موافقتك",
