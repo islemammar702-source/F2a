@@ -237,8 +237,8 @@ export function Table({ head, children, empty }: { head: ReactNode[]; children: 
   );
 }
 
-export function Td({ children, className }: { children?: ReactNode; className?: string }) {
-  return <td className={cx("px-4 py-3 align-middle", className)}>{children}</td>;
+export function Td({ children, className, dir }: { children?: ReactNode; className?: string; dir?: "ltr" | "rtl" }) {
+  return <td dir={dir} className={cx("px-4 py-3 align-middle", className)}>{children}</td>;
 }
 
 export function StatCard({ label, value, icon, tone = "blue", hint }: { label: ReactNode; value: ReactNode; icon?: ReactNode; tone?: "blue" | "orange" | "green" | "red" | "navy"; hint?: ReactNode }) {

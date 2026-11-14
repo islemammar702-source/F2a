@@ -9,7 +9,7 @@ import { Button, Field, Input, Modal, Select, Textarea } from "./ui";
 
 const EMPTY = { client_type: "individual", name: "", contact_name: "", phone: "", whatsapp: "", email: "", address: "", city: "", tax_id: "", notes: "" };
 
-export default function ClientFormModal({ open, onClose, client, onSaved }: { open: boolean; onClose: () => void; client?: Client | null; onSaved: (c: Client) => void }) {
+export default function ClientFormModal({ open, onClose, client, onSaved, prefill }: { open: boolean; onClose: () => void; client?: Client | null; onSaved: (c: Client) => void; prefill?: Client | null }) {
   const { t } = useI18n();
   const toast = useToast();
   const [form, setForm] = useState<Record<string, string>>(EMPTY);
@@ -19,9 +19,10 @@ export default function ClientFormModal({ open, onClose, client, onSaved }: { op
   useEffect(() => {
     if (open) {
       setErrors({});
-      setForm(client ? Object.fromEntries(Object.keys(EMPTY).map((k) => [k, String((client as Record<string, unknown>)[k] ?? "")])) : EMPTY);
+      const src = client ?? prefill;
+      setForm(src ? Object.fromEntries(Object.keys(EMPTY).map((k) => [k, String((src as Record<string, unknown>)[k] ?? (EMPTY as Record<string, string>)[k])])) : EMPTY);
     }
-  }, [open, client]);
+  }, [open, client, prefill]);
 
   const set = (k: string) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
