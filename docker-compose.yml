@@ -59,7 +59,8 @@ services:
       - ./backups:/backups
       - storage:/storage:ro
       - ./deploy/backup.sh:/backup.sh:ro
-    entrypoint: ["sh", "-c", "while true; do sh /backup.sh; sleep 86400; done"]
+    # tr strips Windows CR line endings in case the script was checked out with CRLF
+    entrypoint: ["sh", "-c", "while true; do tr -d '\\r' < /backup.sh | sh; sleep 86400; done"]
 
 volumes:
   pgdata:
