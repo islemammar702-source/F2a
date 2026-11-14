@@ -40,8 +40,8 @@ def seed_reference(db: Session) -> None:
     if not cs.address:
         cs.address = "Zone industrielle"
         cs.city = "Tunis"
-        cs.phone = "+216 00 000 000"
-        cs.whatsapp = "+216 00 000 000"
+        cs.phone = "+216 22 907 339"
+        cs.whatsapp = "+21622907339"
         cs.email = "contact@f2a-travaux.tn"
         cs.payment_terms_fr = "50 % à la commande, solde à la fin des travaux. Paiement par virement, chèque ou espèces."
         cs.payment_terms_ar = "50 % عند الطلب والباقي عند انتهاء الأشغال. الدفع بالتحويل أو الصك أو نقدًا."
