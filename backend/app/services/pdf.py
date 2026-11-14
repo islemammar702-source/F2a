@@ -139,7 +139,13 @@ class Writer:
         return list(reversed(cells)) if self.rtl else cells
 
 
+DEFAULT_LOGO = Path(__file__).resolve().parent.parent / "assets" / "logo-f2a.png"
+
+
 def _logo_flowable(logo_path: str | None, height: float = 22 * mm):
+    # No logo uploaded in Paramètres → use the official F2A logo bundled with the app
+    if not (logo_path and Path(logo_path).exists()) and DEFAULT_LOGO.exists():
+        logo_path = str(DEFAULT_LOGO)
     if logo_path and Path(logo_path).exists():
         try:
             img = Image(logo_path)

@@ -7,7 +7,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: { default: "F2A TRAVAUX – Société de Fluides et Travaux", template: "%s | F2A TRAVAUX" },
   description: "Chauffage central, ventilation, climatisation, plomberie et installations sanitaires en Tunisie.",
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: "/logo-mark.png", apple: "/logo-mark.png" },
 };
 
 export const viewport: Viewport = { themeColor: "#174B83", width: "device-width", initialScale: 1 };
