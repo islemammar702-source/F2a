@@ -63,8 +63,8 @@ function Login() {
         <div className="bg-thermal absolute inset-x-0 top-0 h-1" />
         <Link href="/" className="relative"><Logo light /></Link>
         <div className="relative">
-          <span className="eyebrow text-ice">F2A MANAGER</span>
-          <h2 className="mt-4 text-4xl font-extrabold leading-tight xl:text-5xl">{t("common.appName")}</h2>
+          <span className="eyebrow text-ice">{t("nav.adminSpace")}</span>
+          <h2 className="mt-4 text-4xl font-extrabold leading-tight xl:text-5xl">{t("common.company")}</h2>
           <div className="bg-thermal mt-6 h-1.5 w-24 rounded-full" />
           <p className="mt-6 max-w-md leading-relaxed text-white/65">{t("public.heroText")}</p>
         </div>

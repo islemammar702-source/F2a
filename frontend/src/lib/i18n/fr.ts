@@ -27,7 +27,7 @@ const fr = {
     finance: "Finance", administration: "Administration", backToSite: "Retour au site",
   },
   auth: {
-    title: "Connexion à F2A MANAGER", subtitle: "Accédez à votre espace de gestion sécurisé", email: "Adresse email",
+    title: "Connexion à F2A TRAVAUX", subtitle: "Accédez à votre espace de gestion sécurisé", email: "Adresse email",
     password: "Mot de passe", show: "Afficher le mot de passe", hide: "Masquer le mot de passe", remember: "Se souvenir de moi",
     forgot: "Mot de passe oublié ?", submit: "Se connecter", forgotTitle: "Mot de passe oublié",
     forgotText: "Saisissez votre adresse email. Si un compte existe, vous recevrez un lien de réinitialisation valable 1 heure.",
