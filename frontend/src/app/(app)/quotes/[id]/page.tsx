@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, CheckCircle2, Copy, FileText, Mail, MessageCircle, Pencil, RotateCcw, Send, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Copy, FileText, Mail, MessageCircle, Pencil, RotateCcw, Send, Trash2, XCircle } from "lucide-react";
 import { RequirePermission } from "@/components/AppShell";
 import DocumentEditor, { toPayloadItems, type EditorValue } from "@/components/DocumentEditor";
 import Attachments from "@/components/Attachments";
@@ -39,6 +39,7 @@ function QuoteDetail() {
   const [stamp, setStamp] = useState(true);
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   if (loading && !q) return <Loading />;
   if (!q) return <Empty text={t("common.notFound")} />;
@@ -198,6 +199,7 @@ function QuoteDetail() {
                     <Button variant="accent" icon={<FileText className="h-4 w-4" />} onClick={() => { setStamp(settings?.apply_stamp_duty ?? true); setConvertOpen(true); }}>{t("quotes.convert")}</Button>
                   )}
                   <Button variant="ghost" icon={<Copy className="h-4 w-4" />} onClick={duplicate}>{t("common.duplicate")}</Button>
+                  {!q.invoice_id && <Button variant="ghost" className="text-red-600 hover:bg-red-50" icon={<Trash2 className="h-4 w-4" />} onClick={() => setDeleteOpen(true)}>{t("quotes.delete")}</Button>}
                 </div>
                 {q.status === "accepted" && <p className="mt-3 text-xs text-slate-500">{t("quotes.locked")}</p>}
               </Card>
@@ -229,6 +231,19 @@ function QuoteDetail() {
         <Field label={t("quotes.decisionComment")}><Textarea value={comment} onChange={(e) => setComment(e.target.value)} /></Field>
       </ConfirmDialog>
 
+      <ConfirmDialog open={deleteOpen} onClose={() => setDeleteOpen(false)} loading={busy} danger confirmLabel={t("common.delete")}
+        title={t("quotes.deleteTitle")} text={t("quotes.deleteText", { number: q.number })}
+        onConfirm={async () => {
+          setBusy(true);
+          try {
+            await api(`/quotes/${q.id}`, { method: "DELETE" });
+            toast.success(`${t("quotes.deleted")} – ${q.number}`);
+            router.push("/quotes");
+          } catch (e) {
+            toast.error(e);
+            setBusy(false);
+          }
+        }} />
       <ConfirmDialog open={convertOpen} onClose={() => setConvertOpen(false)} onConfirm={convert} loading={busy} title={t("quotes.convertTitle")} text={t("quotes.convertText")}>
         <div className="mt-3"><Checkbox label={`${t("quotes.applyStamp")} (${formatMoney(settings?.stamp_duty ?? 1, lang)})`} checked={stamp} onChange={setStamp} /></div>
       </ConfirmDialog>

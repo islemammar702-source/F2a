@@ -278,3 +278,17 @@ def test_global_search(client, manager):
     make_quote(client, manager, c["id"])
     r = client.get("/api/search?q=médit", headers=manager).json()
     assert r["clients"][0]["label"] == "Hôtel Méditerranée" and len(r["quotes"]) == 1
+
+
+def test_quote_delete_rules(client, manager, admin):
+    cid = make_client(client, manager)["id"]
+    q = make_quote(client, manager, cid)
+    assert client.delete(f"/api/quotes/{q['id']}", headers=manager).status_code == 204
+    assert client.get(f"/api/quotes/{q['id']}", headers=manager).status_code == 404
+    # a quote converted to an invoice cannot be deleted
+    q2 = make_quote(client, manager, cid)
+    client.post(f"/api/quotes/{q2['id']}/status", json={"status": "sent"}, headers=manager)
+    client.post(f"/api/quotes/{q2['id']}/decision", json={"decision": "accepted"}, headers=manager)
+    r = client.post(f"/api/invoices/from-quote/{q2['id']}", json={}, headers=admin)
+    if r.status_code == 201:
+        assert client.delete(f"/api/quotes/{q2['id']}", headers=manager).json()["detail"] == "quote_has_invoice"

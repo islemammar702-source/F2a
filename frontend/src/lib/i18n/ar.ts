@@ -61,6 +61,8 @@ const ar: Dict = {
     created: "تم إنشاء الحريف", updated: "تم تعديل الحريف", portalAccount: "إنشاء حساب في الفضاء",
   },
   quotes: {
+    delete: "حذف عرض السعر", deleteTitle: "حذف عرض السعر هذا؟", deleted: "تم حذف عرض السعر",
+    deleteText: "سيُحذف عرض السعر {number} وأسطره ووثائقه المرفقة نهائيًا.",
     title: "عروض الأسعار", subtitle: "إنشاء ومتابعة عروض الأسعار", new: "عرض سعر جديد", newTitle: "عرض سعر جديد", editTitle: "تعديل عرض السعر",
     number: "الرقم", client: "الحريف", object: "موضوع العرض", siteAddress: "عنوان الحضيرة", issueDate: "تاريخ العرض",
     validityDate: "تاريخ الصلاحية", paymentTerms: "شروط الدفع", specialConditions: "شروط خاصة",
@@ -201,7 +203,7 @@ const ar: Dict = {
     attachments: "الوثائق الممسوحة", none: "لا توجد وثائق مرفقة.", added: "تمت إضافة الوثيقة.", confirmDelete: "حذف هذه الوثيقة المرفقة؟",
   },
   errors: {
-    scan_ai_unreachable: "تعذّر الوصول إلى خدمة القراءة (اتصال الخادم بالإنترنت؟).", scan_ai_bad_key: "مفتاح القراءة التلقائية (ANTHROPIC_API_KEY) غير صالح.", scan_ai_busy: "خدمة القراءة مشغولة، أعد المحاولة بعد قليل.", scan_ai_failed: "تعذّرت قراءة الوثيقة تلقائيًا.", scan_ocr_failed: "فشلت قراءة الوثيقة (صورة غير واضحة أو مظلمة؟).", invalid_attachment: "لا يمكن إرفاق هذه الوثيقة هنا.",
+    scan_ai_unreachable: "تعذّر الوصول إلى خدمة القراءة (اتصال الخادم بالإنترنت؟).", scan_ai_bad_key: "مفتاح القراءة التلقائية (ANTHROPIC_API_KEY) غير صالح.", scan_ai_busy: "خدمة القراءة مشغولة، أعد المحاولة بعد قليل.", scan_ai_failed: "تعذّرت قراءة الوثيقة تلقائيًا.", quote_has_invoice: "تم تحويل عرض السعر هذا إلى فاتورة: لا يمكن حذفه.", scan_ocr_failed: "فشلت قراءة الوثيقة (صورة غير واضحة أو مظلمة؟).", invalid_attachment: "لا يمكن إرفاق هذه الوثيقة هنا.",
     invalid_credentials: "البريد الإلكتروني أو كلمة المرور غير صحيحة.", too_many_attempts: "محاولات كثيرة. أعد المحاولة بعد بضع دقائق.",
     account_disabled: "هذا الحساب معطّل.", forbidden: "ليس لديك صلاحية القيام بهذا الإجراء.",
     not_found: "العنصر غير موجود.", validation_error: "بعض الحقول غير صالحة.", email_taken: "هذا البريد الإلكتروني مستعمل.",

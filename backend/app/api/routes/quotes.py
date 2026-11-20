@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import client_ip, require_permission
 from app.db.session import get_db
-from app.models import Client, Invoice, Quote, QuoteRequest, User
+from app.models import Client, Document, Invoice, Quote, QuoteRequest, User
 from app.schemas.common import Page
 from app.schemas.sales import LineIn, QuoteIn, QuoteListItem, QuoteOut, SendIn, StatusChange
 from app.services import pdf
@@ -25,7 +25,7 @@ from app.services.sales import (
     set_quote_items,
 )
 from app.services.settings_service import get_company_settings
-from app.services.storage import logo_path, store_generated_pdf
+from app.services.storage import absolute_path, logo_path, store_generated_pdf
 
 router = APIRouter(prefix="/quotes", tags=["quotes"])
 
@@ -140,6 +140,26 @@ def update_quote(quote_id: uuid.UUID, data: QuoteIn, request: Request, db: Sessi
     db.commit()
     db.refresh(quote)
     return quote_out(db, quote)
+
+
+@router.delete("/{quote_id}", status_code=204)
+def delete_quote(quote_id: uuid.UUID, request: Request, db: Session = Depends(get_db),
+                 actor: User = Depends(require_permission("quotes.manage"))):
+    """Delete a quote (and its PDFs / scanned attachments). Refused once an invoice was created from it:
+    the invoice must keep its origin."""
+    q = get_quote_or_404(db, quote_id)
+    if db.scalar(select(func.count()).select_from(Invoice).where(Invoice.quote_id == q.id)):
+        raise HTTPException(400, detail="quote_has_invoice")
+    docs = db.execute(select(Document).where(Document.entity_type == "quote", Document.entity_id == q.id)).scalars().all()
+    for d in docs:
+        try:
+            absolute_path(d).unlink(missing_ok=True)
+        except HTTPException:
+            pass
+        db.delete(d)
+    log_activity(db, actor, "quote.deleted", "quote", q.id, summary=f"{q.number} – {q.title}", ip=client_ip(request))
+    db.delete(q)
+    db.commit()
 
 
 @router.post("/{quote_id}/duplicate", response_model=QuoteOut, status_code=201)

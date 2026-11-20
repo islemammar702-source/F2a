@@ -59,6 +59,8 @@ const fr = {
     created: "Client créé", updated: "Client modifié", portalAccount: "Créer un accès portail",
   },
   quotes: {
+    delete: "Supprimer le devis", deleteTitle: "Supprimer ce devis ?", deleted: "Devis supprimé",
+    deleteText: "Le devis {number}, ses lignes et ses documents joints seront supprimés définitivement.",
     title: "Devis", subtitle: "Création et suivi des devis", new: "NOUVEAU DEVIS", newTitle: "Nouveau devis", editTitle: "Modifier le devis",
     number: "Numéro", client: "Client", object: "Objet du devis", siteAddress: "Adresse du chantier", issueDate: "Date du devis",
     validityDate: "Date de validité", paymentTerms: "Conditions de paiement", specialConditions: "Conditions particulières",
@@ -199,7 +201,7 @@ const fr = {
     attachments: "Documents scannés", none: "Aucun document joint.", added: "Document ajouté.", confirmDelete: "Supprimer ce document joint ?",
   },
   errors: {
-    scan_ai_unreachable: "Service de lecture injoignable (connexion internet du serveur ?).", scan_ai_bad_key: "Clé de lecture automatique (ANTHROPIC_API_KEY) invalide.", scan_ai_busy: "Service de lecture occupé, réessayez dans un instant.", scan_ai_failed: "Le document n'a pas pu être lu automatiquement.", scan_ocr_failed: "La lecture du document a échoué (photo floue ou trop sombre ?).", invalid_attachment: "Ce document ne peut pas être joint ici.",
+    scan_ai_unreachable: "Service de lecture injoignable (connexion internet du serveur ?).", scan_ai_bad_key: "Clé de lecture automatique (ANTHROPIC_API_KEY) invalide.", scan_ai_busy: "Service de lecture occupé, réessayez dans un instant.", scan_ai_failed: "Le document n'a pas pu être lu automatiquement.", quote_has_invoice: "Ce devis a été transformé en facture : il ne peut plus être supprimé.", scan_ocr_failed: "La lecture du document a échoué (photo floue ou trop sombre ?).", invalid_attachment: "Ce document ne peut pas être joint ici.",
     invalid_credentials: "Email ou mot de passe incorrect.", too_many_attempts: "Trop de tentatives. Réessayez dans quelques minutes.",
     account_disabled: "Ce compte est désactivé.", forbidden: "Vous n'avez pas l'autorisation d'effectuer cette action.",
     not_found: "Élément introuvable.", validation_error: "Certains champs sont invalides.", email_taken: "Cette adresse email est déjà utilisée.",
