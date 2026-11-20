@@ -75,7 +75,7 @@ export default function HomePage() {
       {/* SERVICES — numbered technical cards */}
       <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
         <SectionTitle eyebrow={`01 · ${t("nav.services")}`} title={t("public.servicesTitle")} text={t("public.servicesText")} />
-        <div className="grid gap-px overflow-hidden rounded-3xl bg-slate-200/80 ring-1 ring-slate-200/80 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-px overflow-hidden rounded-3xl bg-slate-200/80 ring-1 ring-slate-200/80 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((s, i) => (
             <Link key={s.code} href="/services" className="group relative bg-white p-7 transition hover:bg-surface">
               <span className={`absolute inset-x-0 top-0 h-1 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100 rtl:origin-right ${s.tone === "hot" ? "bg-gradient-to-r from-flame-yellow to-flame-red" : "bg-gradient-to-r from-brand to-ice"}`} />

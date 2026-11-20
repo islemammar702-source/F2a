@@ -7,7 +7,7 @@ import { Button, Field, Input, Select, Textarea } from "./ui";
 import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 
-export const SERVICE_CODES = ["heating", "ventilation", "ac", "plumbing", "sanitary", "fluids", "maintenance", "repair", "other"];
+export const SERVICE_CODES = ["heating", "ventilation", "ac", "solar", "plumbing", "sanitary", "fluids", "maintenance", "repair", "other"];
 
 /** Quote request form, used on the public site (/request-quote) and in the client portal. */
 export default function RequestForm({ endpoint, defaults, onDone }: { endpoint: string; defaults?: { name?: string; phone?: string; email?: string }; onDone?: () => void }) {

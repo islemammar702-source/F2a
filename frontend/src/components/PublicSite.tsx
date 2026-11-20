@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { Droplets, Fan, Flame, Gauge, LifeBuoy, Mail, MapPin, Menu, Phone, ShowerHead, Snowflake, Wrench, X } from "lucide-react";
+import { Droplets, Fan, Flame, Gauge, LifeBuoy, Mail, MapPin, Menu, Phone, ShowerHead, Snowflake, Sun, Wrench, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
@@ -30,6 +30,7 @@ export const SERVICES: { code: string; icon: ReactNode; tone: Tone }[] = [
   { code: "heating", icon: <Flame className="h-6 w-6" />, tone: "hot" },
   { code: "ventilation", icon: <Fan className="h-6 w-6" />, tone: "cold" },
   { code: "ac", icon: <Snowflake className="h-6 w-6" />, tone: "cold" },
+  { code: "solar", icon: <Sun className="h-6 w-6" />, tone: "hot" },
   { code: "plumbing", icon: <Droplets className="h-6 w-6" />, tone: "cold" },
   { code: "sanitary", icon: <ShowerHead className="h-6 w-6" />, tone: "hot" },
   { code: "fluids", icon: <Gauge className="h-6 w-6" />, tone: "cold" },
