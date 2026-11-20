@@ -24,7 +24,7 @@ const ar: Dict = {
     dashboard: "لوحة القيادة", users: "المستخدمون", roles: "الأدوار والصلاحيات", clients: "الحرفاء", quotes: "عروض الأسعار",
     invoices: "الفواتير", payments: "الدفوعات", reports: "التقارير المالية", settings: "الإعدادات", requests: "الطلبات",
     home: "الرئيسية", about: "الشركة", services: "خدماتنا", projects: "إنجازاتنا", contact: "اتصل بنا",
-    requestQuote: "اطلب عرض سعر", login: "تسجيل الدخول", clientSpace: "فضاء الحريف", portalHome: "الرئيسية",
+    requestQuote: "اطلب عرض سعر", login: "تسجيل الدخول", clientSpace: "فضاء الحريف", adminSpace: "فضاء الإدارة", portalHome: "الرئيسية",
     myQuotes: "عروض أسعاري", myInvoices: "فواتيري", myPayments: "دفوعاتي", myProfile: "ملفي الشخصي", management: "التسيير",
     finance: "المالية", administration: "الإدارة", backToSite: "العودة إلى الموقع",
   },

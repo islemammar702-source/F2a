@@ -22,7 +22,7 @@ const fr = {
     dashboard: "Tableau de bord", users: "Utilisateurs", roles: "Rôles & permissions", clients: "Clients", quotes: "Devis",
     invoices: "Factures", payments: "Paiements", reports: "Rapports financiers", settings: "Paramètres", requests: "Demandes",
     home: "Accueil", about: "L'entreprise", services: "Services", projects: "Réalisations", contact: "Contact",
-    requestQuote: "Demander un devis", login: "Connexion", clientSpace: "Espace client", portalHome: "Accueil",
+    requestQuote: "Demander un devis", login: "Connexion", clientSpace: "Espace client", adminSpace: "Espace admin", portalHome: "Accueil",
     myQuotes: "Mes devis", myInvoices: "Mes factures", myPayments: "Mes paiements", myProfile: "Mon profil", management: "Gestion",
     finance: "Finance", administration: "Administration", backToSite: "Retour au site",
   },

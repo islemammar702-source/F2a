@@ -67,7 +67,9 @@ export function PublicHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const links = [["/", t("nav.home")], ["/about", t("nav.about")], ["/services", t("nav.services")], ["/projects", t("nav.projects")], ["/contact", t("nav.contact")]];
+  // Logged out → "Connexion" (same page for admin, staff and clients); logged in → their own space
   const space = user ? (user.role.is_client_role ? "/portal" : "/dashboard") : "/login";
+  const spaceLabel = !user ? t("nav.login") : user.role.is_client_role ? t("nav.clientSpace") : t("nav.adminSpace");
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/90 backdrop-blur-md">
       <ThermalBar />
@@ -83,14 +85,14 @@ export function PublicHeader() {
         </nav>
         <div className="flex items-center gap-1">
           <LanguageSwitch />
-          <Link href={space} className="hidden sm:block"><Button variant="outline" size="sm">{user ? t("nav.clientSpace") : t("nav.login")}</Button></Link>
+          <Link href={space} className="hidden sm:block"><Button variant="outline" size="sm">{spaceLabel}</Button></Link>
           <Link href="/request-quote" className="hidden md:block"><Button variant="accent" size="sm">{t("nav.requestQuote")}</Button></Link>
           <button className="rounded-lg p-2 lg:hidden" onClick={() => setOpen((o) => !o)} aria-label="menu">{open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</button>
         </div>
       </div>
       {open && (
         <nav className="border-t border-slate-100 bg-white px-4 py-3 lg:hidden">
-          {[...links, ["/request-quote", t("nav.requestQuote")], [space, user ? t("nav.clientSpace") : t("nav.login")]].map(([href, label]) => (
+          {[...links, ["/request-quote", t("nav.requestQuote")], [space, spaceLabel]].map(([href, label]) => (
             <Link key={href + label} href={href} onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-surface">{label}</Link>
           ))}
         </nav>
