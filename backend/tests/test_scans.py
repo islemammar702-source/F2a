@@ -148,3 +148,16 @@ def test_ocr_unit_before_quantity():
     r = scan_ocr._parse_row("Liaison frigorifique supplémentaire (au-delà de 3 ml) | ML | 4 | 35,000 | 140,000")
     assert (r["designation"], r["unit"], r["quantity"], r["unit_price_ht"]) == (
         "Liaison frigorifique supplémentaire (au-delà de 3 ml)", "ml", "4", "35.000")
+
+
+def test_ocr_units_deduced_and_ambiguous_thousands():
+    rows = {l: scan_ocr._parse_row(l) for l in [
+        "Tube cuivre 3/8 isolé 12 18,000 216,000",
+        "Main d'oeuvre installation 2 150,000 300,000",
+        "Mise en service 1 120,000 120,000",
+        "Split mural 12000 BTU 2 1 250,500 2 501,000",
+        "Radiateur acier 600x1000 8 u 185,000 1 480,000 1 761,200",
+    ]}
+    got = [(r["unit"], r["quantity"], r["unit_price_ht"]) for r in rows.values()]
+    assert got == [("ml", "12", "18.000"), ("j", "2", "150.000"), ("forfait", "1", "120.000"),
+                   ("u", "2", "1250.500"), ("u", "8", "185.000")]

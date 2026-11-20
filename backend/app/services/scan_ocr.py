@@ -158,7 +158,10 @@ EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 MF_RE = re.compile(r"\b(\d{7}\s?[A-Z](?:\s?/\s?[A-Z]\s?/\s?[A-Z]\s?/\s?\d{3})?)\b")
 UNIT_MAP = {"u": "u", "un": "u", "unite": "u", "unité": "u", "pce": "u", "pc": "u", "pcs": "u", "piece": "u", "pièce": "u",
             "ens": "lot", "ensemble": "lot", "lot": "lot", "ml": "ml", "m": "ml", "m2": "m2", "m²": "m2", "m3": "m3", "m³": "m3",
-            "mi": "ml", "kg": "kg", "h": "h", "heure": "h", "heures": "h", "j": "j", "jour": "j", "jours": "j", "forfait": "forfait", "ff": "forfait"}
+            "mi": "ml", "mI": "ml", "m.l": "ml", "metre": "ml", "mètre": "ml", "metres": "ml", "mètres": "ml", "mts": "ml",
+            "nb": "u", "nbre": "u", "qte": "u", "ft": "forfait", "fft": "forfait", "forf": "forfait", "f": "forfait",
+            "hr": "h", "hrs": "h", "jr": "j", "jrs": "j", "kgs": "kg", "kilo": "kg", "ens.": "lot",
+            "kg": "kg", "h": "h", "heure": "h", "heures": "h", "j": "j", "jour": "j", "jours": "j", "forfait": "forfait", "ff": "forfait"}
 SKIP_LINE = re.compile(r"total|tva|timbre|net\s*à\s*payer|montant|remise|arr[eê]t[ée]|sous[-\s]?total|solde|acompte|r[ée]f[ée]rence|d[ée]signation", re.I)
 LABOR = re.compile(r"main[-\s]?d['’]?\s?(?:oe|œ)uvre|pose|install|montage|mise en service|d[ée]placement|journ[ée]e", re.I)
 SERVICE = re.compile(r"forfait|entretien|maintenance|[ée]tude|contr[oô]le|nettoyage|d[ée]pannage", re.I)
@@ -170,37 +173,92 @@ def _close(a: Decimal, b: Decimal) -> bool:
     return abs(a - b) <= max(Decimal("0.02"), b * Decimal("0.02"))
 
 
+UNIT_GUESS = [  # unit not written on the line → deduce it from the designation (HVAC / plumbing vocabulary)
+    ("ml", r"\b(?:tube|tuyau|tuyauterie|liaison|c[aâ]ble|gaine|conduit|canalisation|goulotte|calorifuge|pvc\s*[øo]?\s*\d|multicouche|per\b|cuivre)"),
+    ("m2", r"\bm[²2]\b|\b(?:peinture|carrelage|faux[-\s]?plafond|cloison|isolation)\b"),
+    ("m3", r"\bm[³3]\b|\b(?:b[ée]ton|terrassement|remblai)\b"),
+    ("j", r"main[-\s]?d['’]?\s?(?:oe|œ)uvre|\bjourn[ée]e"),
+    ("h", r"\bheures?\b"),
+    ("forfait", r"forfait|mise en service|d[ée]placement|entretien|maintenance|nettoyage|essais?|r[ée]glage|[ée]tude|d[ée]pannage|transport"),
+    ("kg", r"\b(?:gaz|r[-\s]?32|r[-\s]?410a?|fluide frigorig[eè]ne|r[ée]frig[ée]rant)\b"),
+]
+
+
+def guess_unit(designation: str) -> str:
+    for unit, rx in UNIT_GUESS:
+        if re.search(rx, designation, re.I):
+            return unit
+    return "u"
+
+
+SIMPLE_NUM = re.compile(r"(?<![\w/.-])(\d+(?:[.,]\d{1,3})?)(?![\w/])")
+
+
+def _candidates(clean: str):
+    """Numbers of the row. "2 150,000" is ambiguous (2150 or 2 then 150): both readings are kept."""
+    toks = [(m.start(), m.end(), m.group(1)) for m in SIMPLE_NUM.finditer(clean)]
+    out = []  # (first token, last token, value, start pos, end pos)
+    for i, (s0, e0, t0) in enumerate(toks):
+        v = parse_money(t0)
+        if v is not None:
+            out.append((i, i, v, s0, e0))
+        # thousands written with spaces: "1 250,500", "12 500"
+        j, txt, end = i, t0, e0
+        while j + 1 < len(toks) and re.fullmatch(r"\d{1,3}", txt.split(" ")[0]) and "," not in txt and "." not in txt \
+                and re.fullmatch(r"\d{3}(?:[.,]\d{1,3})?", toks[j + 1][2]) and clean[end:toks[j + 1][0]].strip() == "":
+            j += 1
+            txt, end = f"{txt} {toks[j][2]}", toks[j][1]
+            v = parse_money(txt)
+            if v is not None:
+                out.append((i, j, v, s0, end))
+    return out, len(toks)
+
+
 def _parse_row(line: str) -> dict | None:
     """Find designation / quantity / unit / unit price in one table row.
-    A row is accepted only when quantity × unit price matches a later figure (total HT or TTC)."""
+    A row is accepted only when quantity × unit price matches a later figure (total HT or TTC);
+    among possible readings, the one ending at the last figure and using all figures wins."""
     tva = PCT_RE.search(line)
     clean = CURRENCY_RE.sub(" ", PCT_RE.sub(" ", line))
-    nums = [(m.start(), m.end(), parse_money(m.group(1))) for m in MONEY_RE.finditer(clean)]
-    nums = [n for n in nums if n[2] is not None]
     rate = parse_money(tva.group(1)) if tva else None
-    for i, (qs, qe, qty) in enumerate(nums):
-        des = clean[:qs]
-        if not re.search(r"[A-Za-zÀ-ÿ\u0600-\u06ff]{2}", des) or qty <= 0 or qty > 100000:
+    cands, n = _candidates(clean)
+    if n < 3:
+        return None
+    best, best_score = None, None
+    for q in cands:
+        qty = q[2]
+        des = clean[:q[3]]
+        if qty <= 0 or qty > 100000 or not re.search(r"[A-Za-zÀ-ÿ\u0600-\u06ff]{2}", des):
             continue
-        for j in range(i + 1, len(nums)):
-            pu = nums[j][2]
-            for _, _, tot in nums[j + 1:]:
-                ok_ht = _close(qty * pu, tot)
-                ok_ttc = rate is not None and _close(qty * pu * (1 + rate / 100), tot)
-                if (ok_ht or ok_ttc) and tot > 0:
-                    des_txt = re.sub(r"[|_]+", " ", des).strip(" -:.\t")
-                    unit_txt = clean[qe:nums[j][0]].strip(" |").lower().rstrip(".")
-                    if unit_txt not in UNIT_MAP:
-                        # "Désignation | Unité | Qté | P.U." layout: the unit is the last word before the quantity
-                        tail = re.search(r"[\s|]([A-Za-z²³]{1,8})\.?$", des_txt)
-                        if tail and tail.group(1).lower() in UNIT_MAP:
-                            unit_txt, des_txt = tail.group(1).lower(), des_txt[:tail.start()].strip(" -:.\t|")
-                    return {
-                        "designation": des_txt[:255],
-                        "quantity": str(qty), "unit": UNIT_MAP.get(unit_txt, "u"), "unit_price_ht": str(pu),
-                        "tva_rate": (f"{rate:f}".rstrip("0").rstrip(".") if "." in f"{rate:f}" else f"{rate:f}") if rate is not None else None,
-                    }
-    return None
+        for p in cands:
+            if p[0] <= q[1]:
+                continue
+            for t in cands:
+                if t[0] <= p[1] or t[2] <= 0 or t[1] < n - 3:  # total HT may be followed by a total TTC
+                    continue
+                pu, tot = p[2], t[2]
+                if not (_close(qty * pu, tot) or (rate is not None and _close(qty * pu * (1 + rate / 100), tot))):
+                    continue
+                used = (q[1] - q[0] + 1) + (p[1] - p[0] + 1) + (t[1] - t[0] + 1)
+                gap = (n - q[0]) - used  # figures after the quantity that this reading leaves unexplained
+                score = (t[1] == n - 1, -gap, -q[0])
+                if best_score is None or score > best_score:
+                    best, best_score = (q, p), score
+    if best is None:
+        return None
+    q, p = best
+    des_txt = re.sub(r"[|_]+", " ", clean[:q[3]]).strip(" -:.\t")
+    unit_txt = clean[q[4]:p[3]].strip(" |").lower().rstrip(".")
+    if unit_txt not in UNIT_MAP:
+        # "Désignation | Unité | Qté | P.U." layout: the unit is the last word before the quantity
+        tail = re.search(r"[\s|]([A-Za-z²³]{1,8})\.?$", des_txt)
+        if tail and tail.group(1).lower() in UNIT_MAP:
+            unit_txt, des_txt = tail.group(1).lower(), des_txt[:tail.start()].strip(" -:.\t|")
+    return {
+        "designation": des_txt[:255],
+        "quantity": str(q[2]), "unit": UNIT_MAP.get(unit_txt) or guess_unit(des_txt), "unit_price_ht": str(p[2]),
+        "tva_rate": (f"{rate:f}".rstrip("0").rstrip(".") if "." in f"{rate:f}" else f"{rate:f}") if rate is not None else None,
+    }
 
 
 def parse_lines(text: str) -> list[dict]:
