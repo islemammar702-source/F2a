@@ -133,3 +133,12 @@ def test_ocr_parse_payment_and_money():
                  "invoice_number": "FAC-2026-014"}
     assert [str(scan_ocr.parse_money(x)) for x in ["1 250,500", "1.250,500", "1,250.5", "18,000", "300"]] == \
         ["1250.500", "1250.500", "1250.5", "18.000", "300"]
+
+
+def test_ocr_rows_with_currency_and_vat_columns():
+    r = scan_ocr.parse_sales("Devis N° 143\nDate : 07/04/2025\nValidité : 15 jours\n"
+                             "Main-d'oeuvre 5 h 60,00 € 20% 60,00€ 360,00 €\nProduit 10 pcs 105,00 € 20% 210,00€ 1 260,00 €\n"
+                             "Total TTC 1 620,00 €", "quote")
+    assert r["second_date"] == "2025-04-22"
+    assert [(i["designation"], i["quantity"], i["unit"], i["unit_price_ht"], i["tva_rate"]) for i in r["items"]] == [
+        ("Main-d'oeuvre", "5", "h", "60.00", "20"), ("Produit", "10", "u", "105.00", "20")]

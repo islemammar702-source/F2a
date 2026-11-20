@@ -103,10 +103,14 @@ export default function DocumentEditor({
     const found = x.client?.name || x.client?.phone ? matchClient(clients, x.client) : undefined;
     setScannedClient(found || !x.client?.name ? null : x.client);
     setScanInfo({ total: x.total_ttc, number: x.document_number });
+    // a VAT rate that is not one of the company's rates (e.g. 20 % on a French document) → default rate
+    const allowed = (settings?.tax_rates ?? [0, 7, 13, 19]).map(toNumber);
+    const rateOf = (r: string | null) => (r !== null && allowed.includes(toNumber(r)) ? String(toNumber(r)) : String(defaultTva));
+    const fallbackTitle = `${t(kind === "quote" ? "scan.importedQuote" : "scan.importedInvoice")}${x.document_number ? ` n° ${x.document_number}` : ""}`;
     setV((cur) => ({
       ...cur,
       client_id: found?.id ?? cur.client_id,
-      title: x.title ?? cur.title,
+      title: x.title ?? (cur.title || fallbackTitle),
       site_address: x.site_address ?? (found ? [found.address, found.city].filter(Boolean).join(", ") : cur.site_address),
       issue_date: x.issue_date ?? cur.issue_date,
       second_date: x.second_date ?? cur.second_date,
@@ -114,7 +118,7 @@ export default function DocumentEditor({
       notes: [cur.notes, x.notes, x.document_number && `${t("scan.originalNumber")} : ${x.document_number}`].filter(Boolean).join("\n"),
       apply_stamp_duty: x.apply_stamp_duty ?? cur.apply_stamp_duty,
       items: x.items.length
-        ? x.items.map((l) => ({ ...l, description: l.description ?? "", tva_rate: l.tva_rate ?? String(defaultTva) }))
+        ? x.items.map((l) => ({ ...l, description: l.description ?? "", tva_rate: rateOf(l.tva_rate) }))
         : cur.items,
     }));
   };

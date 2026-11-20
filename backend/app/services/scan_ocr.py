@@ -12,7 +12,7 @@ import re
 import shutil
 import subprocess
 import tempfile
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
@@ -162,16 +162,39 @@ UNIT_MAP = {"u": "u", "un": "u", "unite": "u", "unité": "u", "pce": "u", "pc": 
 SKIP_LINE = re.compile(r"total|tva|timbre|net\s*à\s*payer|montant|remise|arr[eê]t[ée]|sous[-\s]?total|solde|acompte|r[ée]f[ée]rence|d[ée]signation", re.I)
 LABOR = re.compile(r"main[-\s]?d['’]?\s?(?:oe|œ)uvre|pose|install|montage|mise en service|d[ée]placement|journ[ée]e", re.I)
 SERVICE = re.compile(r"forfait|entretien|maintenance|[ée]tude|contr[oô]le|nettoyage|d[ée]pannage", re.I)
-LINE_RE = re.compile(
-    rf"^\s*(?:\d{{1,3}}[.)\-]?\s+)?(?P<des>.*?[A-Za-zÀ-ÿ؀-ۿ].*?)\s+"
-    rf"(?P<qty>\d+(?:[.,]\d{{1,3}})?)\s*(?P<unit>[A-Za-zéèû²³]{{1,8}})?\s+"
-    rf"(?P<pu>{_NUM})\s+(?:(?P<tva>\d{{1,2}})\s*%\s+)?(?P<tot>{_NUM})\s*(?:dt|tnd|د\.?ت)?\s*$",
-    re.I,
-)
+CURRENCY_RE = re.compile(r"€|\$|\b(?:eur|euros?|dt|tnd|dinars?)\b|د\.?ت", re.I)
+PCT_RE = re.compile(r"(\d{1,2}(?:[.,]\d{1,2})?)\s*%")
 
 
 def _close(a: Decimal, b: Decimal) -> bool:
     return abs(a - b) <= max(Decimal("0.02"), b * Decimal("0.02"))
+
+
+def _parse_row(line: str) -> dict | None:
+    """Find designation / quantity / unit / unit price in one table row.
+    A row is accepted only when quantity × unit price matches a later figure (total HT or TTC)."""
+    tva = PCT_RE.search(line)
+    clean = CURRENCY_RE.sub(" ", PCT_RE.sub(" ", line))
+    nums = [(m.start(), m.end(), parse_money(m.group(1))) for m in MONEY_RE.finditer(clean)]
+    nums = [n for n in nums if n[2] is not None]
+    rate = parse_money(tva.group(1)) if tva else None
+    for i, (qs, qe, qty) in enumerate(nums):
+        des = clean[:qs]
+        if not re.search(r"[A-Za-zÀ-ÿ\u0600-\u06ff]{2}", des) or qty <= 0 or qty > 100000:
+            continue
+        for j in range(i + 1, len(nums)):
+            pu = nums[j][2]
+            for _, _, tot in nums[j + 1:]:
+                ok_ht = _close(qty * pu, tot)
+                ok_ttc = rate is not None and _close(qty * pu * (1 + rate / 100), tot)
+                if (ok_ht or ok_ttc) and tot > 0:
+                    unit_txt = clean[qe:nums[j][0]].strip().lower().rstrip(".")
+                    return {
+                        "designation": re.sub(r"[|_]+", " ", des).strip(" -:.\t")[:255],
+                        "quantity": str(qty), "unit": UNIT_MAP.get(unit_txt, "u"), "unit_price_ht": str(pu),
+                        "tva_rate": (f"{rate:f}".rstrip("0").rstrip(".") if "." in f"{rate:f}" else f"{rate:f}") if rate is not None else None,
+                    }
+    return None
 
 
 def parse_lines(text: str) -> list[dict]:
@@ -181,22 +204,11 @@ def parse_lines(text: str) -> list[dict]:
         line = raw.strip()
         if len(line) < 6 or SKIP_LINE.search(line):
             continue
-        m = LINE_RE.match(line)
-        if not m:
-            continue
-        qty, pu, tot = parse_money(m["qty"]), parse_money(m["pu"]), parse_money(m["tot"])
-        if not qty or pu is None or tot is None or qty <= 0:
-            continue
-        if not (_close(qty * pu, tot) or _close(qty * pu * Decimal("1.19"), tot)):
-            continue
-        des = re.sub(r"[|_]+", " ", m["des"]).strip(" -:.")
-        unit = UNIT_MAP.get((m["unit"] or "").lower().rstrip("."), "u")
-        items.append({
-            "designation": des[:255],
-            "quantity": str(qty), "unit": unit, "unit_price_ht": str(pu),
-            "tva_rate": m["tva"],
-            "item_type": "labor" if LABOR.search(des) else "service" if SERVICE.search(des) else "material",
-        })
+        row = _parse_row(line)
+        if row and row["designation"]:
+            des = row["designation"]
+            row["item_type"] = "labor" if LABOR.search(des) else "service" if SERVICE.search(des) else "material"
+            items.append(row)
     return items
 
 
@@ -236,6 +248,9 @@ def parse_sales(text: str, kind: str) -> dict:
     second_kw = r"[ée]ch[ée]ance|validit[ée]|valable|due\s*date|à\s*r[ée]gler\s*avant" if kind == "invoice" else r"validit[ée]|valable|expire"
     second = _date_near(text, second_kw)
     issue = _date_near(text, r"\bdate\b|\ble\b\s+\d|du\s+\d") or next((d for _, d in dates if d != second), None)
+    days = re.search(rf"(?:{second_kw})[^\n\d]{{0,25}}(\d{{1,3}})\s*jours", text, re.I)
+    if not second and issue and days:  # "Validité : 15 jours" / "Échéance : 30 jours"
+        second = (date.fromisoformat(issue) + timedelta(days=int(days.group(1)))).isoformat()
     num = re.search(r"\b(?:devis|facture|invoice|n[°ºo]\.?)\s*(?:n[°ºo]\.?)?\s*[:#]?\s*([A-Z]{0,5}[-/ ]?\d[\w\-/]{1,20})", text, re.I)
     tva = re.search(r"\btva\b[^\n%]{0,15}?(\d{1,2})(?:[.,]0+)?\s*%", text, re.I)
     items = parse_lines(text)

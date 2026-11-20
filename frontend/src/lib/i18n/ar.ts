@@ -197,7 +197,7 @@ const ar: Dict = {
     fileKept: "تم إرفاق الملف رغم ذلك.", checkBeforeSave: "بيانات مقروءة تلقائيًا: تحقّق من الحريف والأسطر والمبالغ قبل الحفظ.",
     totalMismatch: "تنبيه: المجموع المقروء {read} ≠ المجموع المحسوب {computed}.",
     clientNotFound: "الحريف المقروء في الوثيقة: «{name}» — غير موجود في قائمة الحرفاء.",
-    originalNumber: "رقم الوثيقة الممسوحة", payer: "الدافع",
+    originalNumber: "رقم الوثيقة الممسوحة", importedQuote: "عرض سعر مستورد", importedInvoice: "فاتورة مستوردة", payer: "الدافع",
     attachments: "الوثائق الممسوحة", none: "لا توجد وثائق مرفقة.", added: "تمت إضافة الوثيقة.", confirmDelete: "حذف هذه الوثيقة المرفقة؟",
   },
   errors: {

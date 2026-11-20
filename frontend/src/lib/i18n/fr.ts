@@ -195,7 +195,7 @@ const fr = {
     fileKept: "Le fichier est quand même joint.", checkBeforeSave: "Données lues automatiquement : vérifiez le client, les lignes et les montants avant d'enregistrer.",
     totalMismatch: "Attention : total lu sur le document {read} ≠ total calculé {computed}.",
     clientNotFound: "Client lu sur le document : « {name} » — introuvable dans vos clients.",
-    originalNumber: "N° du document scanné", payer: "Payeur",
+    originalNumber: "N° du document scanné", importedQuote: "Devis importé", importedInvoice: "Facture importée", payer: "Payeur",
     attachments: "Documents scannés", none: "Aucun document joint.", added: "Document ajouté.", confirmDelete: "Supprimer ce document joint ?",
   },
   errors: {
