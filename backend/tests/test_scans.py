@@ -142,3 +142,9 @@ def test_ocr_rows_with_currency_and_vat_columns():
     assert r["second_date"] == "2025-04-22"
     assert [(i["designation"], i["quantity"], i["unit"], i["unit_price_ht"], i["tva_rate"]) for i in r["items"]] == [
         ("Main-d'oeuvre", "5", "h", "60.00", "20"), ("Produit", "10", "u", "105.00", "20")]
+
+
+def test_ocr_unit_before_quantity():
+    r = scan_ocr._parse_row("Liaison frigorifique supplémentaire (au-delà de 3 ml) | ML | 4 | 35,000 | 140,000")
+    assert (r["designation"], r["unit"], r["quantity"], r["unit_price_ht"]) == (
+        "Liaison frigorifique supplémentaire (au-delà de 3 ml)", "ml", "4", "35.000")

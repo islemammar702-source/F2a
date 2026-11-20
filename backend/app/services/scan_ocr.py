@@ -188,9 +188,15 @@ def _parse_row(line: str) -> dict | None:
                 ok_ht = _close(qty * pu, tot)
                 ok_ttc = rate is not None and _close(qty * pu * (1 + rate / 100), tot)
                 if (ok_ht or ok_ttc) and tot > 0:
-                    unit_txt = clean[qe:nums[j][0]].strip().lower().rstrip(".")
+                    des_txt = re.sub(r"[|_]+", " ", des).strip(" -:.\t")
+                    unit_txt = clean[qe:nums[j][0]].strip(" |").lower().rstrip(".")
+                    if unit_txt not in UNIT_MAP:
+                        # "Désignation | Unité | Qté | P.U." layout: the unit is the last word before the quantity
+                        tail = re.search(r"[\s|]([A-Za-z²³]{1,8})\.?$", des_txt)
+                        if tail and tail.group(1).lower() in UNIT_MAP:
+                            unit_txt, des_txt = tail.group(1).lower(), des_txt[:tail.start()].strip(" -:.\t|")
                     return {
-                        "designation": re.sub(r"[|_]+", " ", des).strip(" -:.\t")[:255],
+                        "designation": des_txt[:255],
                         "quantity": str(qty), "unit": UNIT_MAP.get(unit_txt, "u"), "unit_price_ht": str(pu),
                         "tva_rate": (f"{rate:f}".rstrip("0").rstrip(".") if "." in f"{rate:f}" else f"{rate:f}") if rate is not None else None,
                     }
