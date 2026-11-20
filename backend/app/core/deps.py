@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.security import decode_access_token
-from app.db.session import get_db
+from app.db.session import get_db  # noqa: F401  (re-exported for routes)
 from app.models import User, UserSession
 
 bearer = HTTPBearer(auto_error=False)

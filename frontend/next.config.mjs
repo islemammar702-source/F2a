@@ -12,6 +12,8 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   output: "standalone",
+  // Reading a scanned document with the AI can take ~30 s: allow slow API responses through the proxy
+  experimental: { proxyTimeout: 120_000 },
   // The browser only talks to Next.js; /api/* is proxied to FastAPI (same origin → httpOnly refresh cookie works).
   async rewrites() {
     return [{ source: "/api/:path*", destination: `${BACKEND_URL}/api/:path*` }];

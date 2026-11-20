@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ArrowLeft, CheckCircle2, Copy, FileText, Mail, MessageCircle, Pencil, RotateCcw, Send, XCircle } from "lucide-react";
 import { RequirePermission } from "@/components/AppShell";
 import DocumentEditor, { toPayloadItems, type EditorValue } from "@/components/DocumentEditor";
+import Attachments from "@/components/Attachments";
 import { InfoGrid, LinesTable, PdfActions, TotalsBox } from "@/components/DocView";
 import { useToast } from "@/components/Toast";
 import { Button, Card, Checkbox, ConfirmDialog, Empty, Field, Input, Loading, Modal, PageHeader, StatusBadge, Textarea } from "@/components/ui";
@@ -201,6 +202,7 @@ function QuoteDetail() {
                 {q.status === "accepted" && <p className="mt-3 text-xs text-slate-500">{t("quotes.locked")}</p>}
               </Card>
             )}
+            <Attachments entityType="quote" entityId={q.id} canManage={manage} />
             <Card title={t("invoices.history")}>
               <ul className="space-y-2 text-sm text-slate-600">
                 <li>{t("common.createdAt")} : {formatDateTime(q.created_at, lang)}</li>

@@ -6,7 +6,8 @@ import { api, ApiError } from "@/lib/api";
 import { formatMoney, round3, todayISO, toNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { useCompanySettings } from "@/lib/useSettings";
-import type { DocumentFile, InvoiceListItem, Page, Payment } from "@/lib/types";
+import type { DocumentFile, InvoiceListItem, Page, Payment, ScanResult, ScannedPayment } from "@/lib/types";
+import ScanImport from "./ScanImport";
 import { useToast } from "./Toast";
 import { Button, Field, Input, Modal, Select, Textarea } from "./ui";
 
@@ -22,6 +23,7 @@ export default function PaymentModal({ open, onClose, invoice, onSaved }: { open
   const [reference, setReference] = useState("");
   const [comment, setComment] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [scanDoc, setScanDoc] = useState<DocumentFile | null>(null); // scanned proof, already uploaded
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -32,6 +34,7 @@ export default function PaymentModal({ open, onClose, invoice, onSaved }: { open
     setReference("");
     setComment("");
     setFile(null);
+    setScanDoc(null);
     if (!invoice) {
       api<Page<InvoiceListItem>>("/invoices", { query: { open_only: true, page_size: 100 } }).then((p) => setInvoices(p.items)).catch(toast.error);
     }
@@ -41,6 +44,31 @@ export default function PaymentModal({ open, onClose, invoice, onSaved }: { open
     const first = settings?.payment_methods.find((m) => m.active);
     if (first && !method) setMethod(first.code);
   }, [settings, method]);
+
+  // Keywords used to map the method read on the scan to the company's payment methods
+  const METHOD_HINTS: Record<string, string[]> = {
+    cash: ["cash", "esp"], cheque: ["cheq", "chèq", "chq"], transfer: ["vir", "transfer"], card: ["card", "cart", "tpe"], traite: ["trait", "effet", "lcr"],
+  };
+  const applyScan = (r: ScanResult<ScannedPayment>) => {
+    setScanDoc(r.document);
+    setFile(null);
+    const x = r.extracted;
+    if (!x) return;
+    if (!invoice && x.invoice_number) {
+      const inv = invoices.find((i) => i.number.toLowerCase() === x.invoice_number!.toLowerCase());
+      if (inv) setInvoiceId(inv.id);
+    }
+    if (x.amount) setAmount(x.amount);
+    if (x.payment_date) setDate(x.payment_date > todayISO() ? todayISO() : x.payment_date);
+    if (x.method) {
+      const hints = METHOD_HINTS[x.method] ?? [x.method];
+      const m = settings?.payment_methods.find((pm) => pm.active && (pm.code === x.method || hints.some((h) => pm.code.toLowerCase().includes(h) || pm.label_fr.toLowerCase().includes(h))));
+      if (m) setMethod(m.code);
+    }
+    if (x.reference) setReference(x.reference);
+    const extra = [x.payer_name && `${t("scan.payer")} : ${x.payer_name}`, x.comment].filter(Boolean).join(" – ");
+    if (extra) setComment(extra);
+  };
 
   const current = invoice ?? invoices.find((i) => i.id === invoiceId);
   const balance = toNumber(current?.balance);
@@ -55,8 +83,8 @@ export default function PaymentModal({ open, onClose, invoice, onSaved }: { open
     }
     setSaving(true);
     try {
-      let proof: string | null = null;
-      if (file) {
+      let proof: string | null = scanDoc?.id ?? null;
+      if (!proof && file) {
         if (file.size > 10 * 1024 * 1024) throw new Error("too big");
         const fd = new FormData();
         fd.append("file", file);
@@ -84,6 +112,7 @@ export default function PaymentModal({ open, onClose, invoice, onSaved }: { open
       </>
     }>
       <form id="payment-form" onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
+        <div className="sm:col-span-2"><ScanImport<ScannedPayment> target="payment" compact onResult={applyScan} /></div>
         {invoice ? (
           <div className="rounded-lg bg-surface p-3 text-sm sm:col-span-2">
             <b>{invoice.number}</b> · {invoice.client.name}
@@ -115,8 +144,8 @@ export default function PaymentModal({ open, onClose, invoice, onSaved }: { open
         <Field label={t("payments.proof")} className="sm:col-span-2">
           <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-slate-300 px-3 py-3 text-sm text-slate-600 hover:border-brand">
             <Paperclip className="h-4 w-4" />
-            <span className="truncate">{file?.name ?? t("payments.uploadProof")}</span>
-            <input type="file" accept="application/pdf,image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            <span className="truncate">{scanDoc?.filename ?? file?.name ?? t("payments.uploadProof")}</span>
+            <input type="file" accept="application/pdf,image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => { setScanDoc(null); setFile(e.target.files?.[0] ?? null); }} />
           </label>
         </Field>
         {current && toNumber(amount) > 0 && (

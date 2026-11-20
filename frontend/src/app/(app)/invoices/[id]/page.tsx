@@ -7,6 +7,7 @@ import { ArrowLeft, Ban, Mail, MessageCircle, Pencil, Plus, Send, Undo2 } from "
 import { RequirePermission } from "@/components/AppShell";
 import ActivityRow from "@/components/ActivityRow";
 import DocumentEditor, { toPayloadItems, type EditorValue } from "@/components/DocumentEditor";
+import Attachments from "@/components/Attachments";
 import { InfoGrid, LinesTable, PdfActions, TotalsBox } from "@/components/DocView";
 import PaymentModal from "@/components/PaymentModal";
 import { useToast } from "@/components/Toast";
@@ -191,6 +192,7 @@ function InvoiceDetail() {
               <div className="h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-brand to-accent transition-all" style={{ width: `${pct}%` }} /></div>
               <p className="mt-3 text-sm text-slate-600">{t("invoices.balance")} : <b className="tabular-nums text-navy">{formatMoney(inv.balance, lang)}</b></p>
             </Card>
+            <Attachments entityType="invoice" entityId={inv.id} canManage={can("invoices.manage")} />
             {can("invoices.manage") && !cancelled && (
               <Card title={t("common.actions")}>
                 <div className="flex flex-col gap-2">

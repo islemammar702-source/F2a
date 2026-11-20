@@ -104,3 +104,17 @@ export type User = {
   id: string; email: string; full_name: string; phone: string | null; language: "fr" | "ar"; is_active: boolean;
   role: RoleBrief; client_id: string | null; last_login_at: string | null; created_at: string;
 };
+
+// ---------- Scan / photo import ----------
+export type ScannedClient = { name: string | null; phone: string | null; email: string | null; address: string | null; city: string | null; tax_id: string | null };
+export type ScannedLine = { item_type: Line["item_type"]; designation: string; description: string | null; quantity: string; unit: string; unit_price_ht: string; discount: string; tva_rate: string | null };
+export type ScannedSales = {
+  document_number: string | null; client: ScannedClient; title: string | null; site_address: string | null;
+  issue_date: string | null; second_date: string | null; payment_terms: string | null; notes: string | null;
+  apply_stamp_duty: boolean | null; items: ScannedLine[]; total_ht: string | null; total_ttc: string | null;
+};
+export type ScannedPayment = {
+  amount: string | null; payment_date: string | null; method: string | null; reference: string | null;
+  invoice_number: string | null; payer_name: string | null; comment: string | null;
+};
+export type ScanResult<T = ScannedSales | ScannedPayment> = { document: DocumentFile; ai_enabled: boolean; extracted: T | null; ai_error: string | null };

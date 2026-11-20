@@ -66,6 +66,21 @@ cp .env.example .env        # renseigner POSTGRES_PASSWORD, SECRET_KEY, ADMIN_PA
 docker compose up -d --build
 ```
 
+## Scanner / importer un devis, une facture ou un paiement
+
+Dans **Nouveau devis**, **Nouvelle facture** et **Nouveau paiement**, la zone « Scanner ou importer » permet de
+prendre une photo avec le téléphone ou d'importer une image / un PDF :
+
+- le fichier original est **toujours conservé** (pièce jointe visible sur la fiche du devis / de la facture,
+  ou justificatif du paiement) ;
+- si `ANTHROPIC_API_KEY` est renseignée dans `.env`, le document est **lu automatiquement** (client, lignes,
+  quantités, prix HT, TVA, dates, montant, mode de paiement…) et le formulaire est **pré-rempli** ;
+  vous vérifiez puis enregistrez. Les totaux sont toujours recalculés par le serveur.
+- sans clé, le scan est simplement joint et le formulaire se remplit à la main.
+
+Clé : créer un compte sur https://console.anthropic.com → *API Keys*, ajouter du crédit (facturation à l'usage,
+quelques centimes par document), puis dans `.env` : `ANTHROPIC_API_KEY=sk-ant-...` et `docker compose up -d`.
+
 ### Mise en ligne sur un serveur (VPS) avec HTTPS
 
 1. Chez le vendeur du domaine, créez un enregistrement **A** `f2a-travaux.com` → IP du serveur (et un **A** ou **CNAME** pour `www`).

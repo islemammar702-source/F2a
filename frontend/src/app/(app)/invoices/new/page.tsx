@@ -32,6 +32,9 @@ function NewInvoice() {
           language: v.language, apply_stamp_duty: v.apply_stamp_duty, items: toPayloadItems(v.items),
         },
       });
+      if (v.attachments?.length) {
+        await api(`/attachments/invoice/${inv.id}`, { method: "POST", body: { document_ids: v.attachments.map((d) => d.id) } }).catch(toast.error);
+      }
       toast.success(`${t("invoices.created")} – ${inv.number}`);
       router.push(`/invoices/${inv.id}`);
     } catch (e) {
@@ -43,7 +46,7 @@ function NewInvoice() {
   return (
     <>
       <PageHeader title={t("invoices.newTitle")} subtitle={t("invoices.subtitle")} />
-      <DocumentEditor kind="invoice" initial={{ client_id: params.get("client") ?? "" }} onSubmit={submit} saving={saving} />
+      <DocumentEditor kind="invoice" scan initial={{ client_id: params.get("client") ?? "" }} onSubmit={submit} saving={saving} />
     </>
   );
 }

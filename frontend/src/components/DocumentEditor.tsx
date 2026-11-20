@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { GripVertical, Hammer, Package, Plus, Trash2, UserPlus, Wrench } from "lucide-react";
+import { GripVertical, Hammer, Package, Paperclip, Plus, Sparkles, Trash2, TriangleAlert, UserPlus, Wrench, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { addDaysISO, documentTotals, formatMoney, lineTotals, todayISO, toNumber } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { useCompanySettings } from "@/lib/useSettings";
-import type { Client, Line, Page } from "@/lib/types";
+import type { Client, DocumentFile, Line, Page, ScanResult, ScannedClient, ScannedSales } from "@/lib/types";
 import ClientFormModal from "./ClientForm";
+import ScanImport from "./ScanImport";
 import { useToast } from "./Toast";
 import { Button, Card, Checkbox, Field, Input, Select, Textarea, cx } from "./ui";
 
@@ -23,7 +24,21 @@ export type EditorValue = {
   language: "fr" | "ar";
   apply_stamp_duty: boolean;
   items: Line[];
+  attachments?: DocumentFile[]; // scanned originals to attach after saving (new documents)
 };
+
+const norm = (s: string | null | undefined) =>
+  (s ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\u0600-\u06ff]+/g, " ").trim();
+
+/** Find an existing client matching the name (or phone / tax id) read on a scanned document. */
+function matchClient(clients: Client[], c: ScannedClient): Client | undefined {
+  const name = norm(c.name);
+  const phone = (c.phone ?? "").replace(/\D/g, "").slice(-8);
+  return clients.find((x) => (c.tax_id && x.tax_id && norm(x.tax_id) === norm(c.tax_id)))
+    ?? clients.find((x) => phone.length === 8 && (x.phone ?? "").replace(/\D/g, "").endsWith(phone))
+    ?? clients.find((x) => name.length > 2 && norm(x.name) === name)
+    ?? clients.find((x) => name.length > 3 && (norm(x.name).includes(name) || name.includes(norm(x.name))));
+}
 
 const UNITS = ["u", "ml", "m2", "m3", "kg", "h", "j", "forfait", "lot"];
 
@@ -41,9 +56,10 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
 }
 
 export default function DocumentEditor({
-  kind, initial, onSubmit, saving, lockClientAndItems = false,
+  kind, initial, onSubmit, saving, lockClientAndItems = false, scan = false,
 }: {
   kind: "quote" | "invoice";
+  scan?: boolean; // show the "scan / import a photo" zone (new documents)
   initial?: Partial<EditorValue>;
   onSubmit: (v: EditorValue) => void;
   saving?: boolean;
@@ -60,6 +76,8 @@ export default function DocumentEditor({
     special_conditions: "", notes: "", language: lang, apply_stamp_duty: true, items: [emptyLine("material", 19)], ...initial,
   }));
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [scannedClient, setScannedClient] = useState<ScannedClient | null>(null);
+  const [scanInfo, setScanInfo] = useState<{ total: string | null; number: string | null } | null>(null);
 
   useEffect(() => {
     api<Page<Client>>("/clients", { query: { page_size: 200 } }).then((p) => setClients(p.items)).catch(toast.error);
@@ -76,6 +94,30 @@ export default function DocumentEditor({
       items: initial?.items ? cur.items : cur.items.map((l) => (l.designation ? l : { ...l, tva_rate: String(toNumber(settings.default_tax_rate)) })),
     }));
   }, [settings]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Pre-fill the form with the data read on a scanned / photographed document
+  const applyScan = (r: ScanResult<ScannedSales>) => {
+    setV((cur) => ({ ...cur, attachments: [...(cur.attachments ?? []), r.document] }));
+    const x = r.extracted;
+    if (!x) return;
+    const found = x.client?.name || x.client?.phone ? matchClient(clients, x.client) : undefined;
+    setScannedClient(found || !x.client?.name ? null : x.client);
+    setScanInfo({ total: x.total_ttc, number: x.document_number });
+    setV((cur) => ({
+      ...cur,
+      client_id: found?.id ?? cur.client_id,
+      title: x.title ?? cur.title,
+      site_address: x.site_address ?? (found ? [found.address, found.city].filter(Boolean).join(", ") : cur.site_address),
+      issue_date: x.issue_date ?? cur.issue_date,
+      second_date: x.second_date ?? cur.second_date,
+      payment_terms: x.payment_terms ?? cur.payment_terms,
+      notes: [cur.notes, x.notes, x.document_number && `${t("scan.originalNumber")} : ${x.document_number}`].filter(Boolean).join("\n"),
+      apply_stamp_duty: x.apply_stamp_duty ?? cur.apply_stamp_duty,
+      items: x.items.length
+        ? x.items.map((l) => ({ ...l, description: l.description ?? "", tva_rate: l.tva_rate ?? String(defaultTva) }))
+        : cur.items,
+    }));
+  };
 
   const set = <K extends keyof EditorValue>(k: K, val: EditorValue[K]) => setV((cur) => ({ ...cur, [k]: val }));
   const setLine = (i: number, patch: Partial<Line>) => setV((cur) => ({ ...cur, items: cur.items.map((l, j) => (j === i ? { ...l, ...patch } : l)) }));
@@ -120,6 +162,33 @@ export default function DocumentEditor({
 
   return (
     <form onSubmit={submit} className="space-y-6">
+      {scan && (
+        <div className="space-y-3">
+          <ScanImport<ScannedSales> target={kind} onResult={applyScan} />
+          {!!v.attachments?.length && (
+            <div className="flex flex-wrap gap-2">
+              {v.attachments.map((d) => (
+                <span key={d.id} className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-200">
+                  <Paperclip className="h-3.5 w-3.5 text-brand" />{d.filename}
+                  <button type="button" aria-label={t("common.remove")} className="text-slate-400 hover:text-red-600"
+                    onClick={() => setV((cur) => ({ ...cur, attachments: cur.attachments?.filter((a) => a.id !== d.id) }))}><X className="h-3.5 w-3.5" /></button>
+                </span>
+              ))}
+            </div>
+          )}
+          {scanInfo && (
+            <p className="flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800 ring-1 ring-amber-200">
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                {t("scan.checkBeforeSave")}
+                {scanInfo.total && Math.abs(toNumber(scanInfo.total) - (totals.ttc + stamp)) > 0.01 && (
+                  <b className="block">{t("scan.totalMismatch", { read: formatMoney(scanInfo.total, lang), computed: formatMoney(totals.ttc + stamp, lang) })}</b>
+                )}
+              </span>
+            </p>
+          )}
+        </div>
+      )}
       <Step n={1} title={t("quotes.step1")}>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t("quotes.client")} required error={errors.client_id} className="min-w-[260px] flex-1">
@@ -133,6 +202,13 @@ export default function DocumentEditor({
           </Field>
           {!lockClientAndItems && <Button type="button" variant="outline" icon={<UserPlus className="h-4 w-4" />} onClick={() => setClientModal(true)}>{t("quotes.createClient")}</Button>}
         </div>
+        {scannedClient && !v.client_id && (
+          <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg bg-ice-50 px-3 py-2 text-sm text-navy ring-1 ring-ice-100">
+            <TriangleAlert className="h-4 w-4 text-brand" />
+            <span className="flex-1">{t("scan.clientNotFound", { name: scannedClient.name ?? "" })}</span>
+            <Button type="button" size="sm" icon={<UserPlus className="h-4 w-4" />} onClick={() => setClientModal(true)}>{t("quotes.createClient")}</Button>
+          </div>
+        )}
         {selectedClient && (
           <p className="mt-3 rounded-lg bg-surface px-3 py-2 text-xs text-slate-600">
             {[selectedClient.phone, selectedClient.email, selectedClient.tax_id && `${t("clients.taxId")}: ${selectedClient.tax_id}`].filter(Boolean).join(" · ")}
@@ -268,9 +344,10 @@ export default function DocumentEditor({
         <Button type="button" variant="outline" onClick={() => history.back()}>{t("common.cancel")}</Button>
         <Button type="submit" variant="accent" loading={saving}>{t("common.save")}</Button>
       </div>
-      <ClientFormModal open={clientModal} onClose={() => setClientModal(false)} onSaved={(c) => {
+      <ClientFormModal open={clientModal} onClose={() => setClientModal(false)} prefill={scannedClient as Client | null} onSaved={(c) => {
         setClients((cs) => [...cs, c].sort((a, b) => a.name.localeCompare(b.name)));
-        set("client_id", c.id);
+        setScannedClient(null);
+        setV((cur) => ({ ...cur, client_id: c.id, site_address: cur.site_address || [c.address, c.city].filter(Boolean).join(", ") }));
       }} />
     </form>
   );

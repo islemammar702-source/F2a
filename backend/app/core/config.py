@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     STORAGE_DIR: Path = BASE_DIR / "storage"
     MAX_UPLOAD_MB: int = 10
 
+    # Optional AI reading of scanned documents (Claude / Anthropic API). Empty key = attach only, no reading.
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_MODEL: str = "claude-sonnet-5-5"
+    SCAN_AI_TIMEOUT: int = 90
+
     # Optional SMTP (email sending). When SMTP_HOST is empty, emails are not sent.
     SMTP_HOST: str = ""
     SMTP_PORT: int = 587

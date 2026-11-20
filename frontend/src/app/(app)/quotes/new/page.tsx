@@ -43,6 +43,10 @@ function NewQuote() {
           special_conditions: v.special_conditions || null, notes: v.notes || null, language: v.language, items: toPayloadItems(v.items),
         },
       });
+      if (v.attachments?.length) {
+        // attach the scanned originals; the quote is already saved even if this fails
+        await api(`/attachments/quote/${q.id}`, { method: "POST", body: { document_ids: v.attachments.map((d) => d.id) } }).catch(toast.error);
+      }
       toast.success(`${t("quotes.created")} – ${q.number}`);
       router.push(`/quotes/${q.id}`);
     } catch (e) {
@@ -54,7 +58,7 @@ function NewQuote() {
   return (
     <>
       <PageHeader title={t("quotes.newTitle")} subtitle={t("quotes.subtitle")} />
-      {initial ? <DocumentEditor kind="quote" initial={initial} onSubmit={submit} saving={saving} /> : <Loading />}
+      {initial ? <DocumentEditor kind="quote" scan initial={initial} onSubmit={submit} saving={saving} /> : <Loading />}
     </>
   );
 }

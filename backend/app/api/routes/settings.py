@@ -109,10 +109,11 @@ def download_document(document_id: uuid.UUID, download: bool = Query(True), db: 
         raise HTTPException(404, detail="not_found")
     perms = user.permission_codes
     if user.role.is_client_role:
-        if doc.client_id is None or doc.client_id != user.client_id or doc.kind == "logo":
+        if doc.client_id is None or doc.client_id != user.client_id or doc.kind in ("logo", "quote_scan", "invoice_scan"):
             raise HTTPException(404, detail="not_found")  # do not leak existence
     else:
-        needed = {"quote_pdf": "quotes.view", "invoice_pdf": "invoices.view", "payment_proof": "payments.view"}.get(doc.kind)
+        needed = {"quote_pdf": "quotes.view", "invoice_pdf": "invoices.view", "payment_proof": "payments.view",
+                  "quote_scan": "quotes.view", "invoice_scan": "invoices.view"}.get(doc.kind)
         if needed and needed not in perms:
             raise HTTPException(403, detail="forbidden")
     path = absolute_path(doc)
