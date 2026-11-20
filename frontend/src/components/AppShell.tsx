@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  Bell, BarChart3, ClipboardList, CreditCard, FileSignature, FileText, Home, Inbox, LayoutDashboard, LogOut, Menu,
+  Bell, BarChart3, BookOpen, ClipboardList, CreditCard, FileSignature, FileText, Home, Inbox, LayoutDashboard, LogOut, Menu,
   Receipt, Search, Settings, Shield, User as UserIcon, Users, X,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -17,7 +17,7 @@ import { Logo } from "./Logo";
 import LanguageSwitch from "./LanguageSwitch";
 import { cx, Loading } from "./ui";
 
-type NavItem = { href: string; label: string; icon: ReactNode; perm?: string };
+type NavItem = { href: string; label: string; icon: ReactNode; perm?: string; anyPerm?: string[] };
 
 function useNav(isClient: boolean): { section: string; items: NavItem[] }[] {
   const { t } = useI18n();
@@ -41,6 +41,7 @@ function useNav(isClient: boolean): { section: string; items: NavItem[] }[] {
         { href: "/requests", label: t("nav.requests"), icon: <Inbox className={i} />, perm: "requests.view" },
         { href: "/quotes", label: t("nav.quotes"), icon: <FileSignature className={i} />, perm: "quotes.view" },
         { href: "/invoices", label: t("nav.invoices"), icon: <FileText className={i} />, perm: "invoices.view" },
+        { href: "/catalog", label: t("nav.catalog"), icon: <BookOpen className={i} />, anyPerm: ["catalog.manage", "quotes.manage", "invoices.manage"] },
       ],
     },
     {
@@ -81,7 +82,7 @@ function Sidebar({ open, onClose, isClient }: { open: boolean; onClose: () => vo
         </div>
         <nav className="relative flex-1 overflow-y-auto px-3 py-4">
           {nav.map((group, gi) => {
-            const items = group.items.filter((it) => !it.perm || can(it.perm));
+            const items = group.items.filter((it) => (!it.perm || can(it.perm)) && (!it.anyPerm || it.anyPerm.some((p) => can(p))));
             if (!items.length) return null;
             return (
               <div key={gi} className="mb-4">

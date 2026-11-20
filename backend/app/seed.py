@@ -22,10 +22,12 @@ from app.services.settings_service import get_company_settings
 
 def seed_reference(db: Session) -> None:
     existing = {p.code: p for p in db.execute(select(Permission)).scalars()}
+    added: set[str] = set()
     for code, (module, desc) in PERMISSIONS.items():
         if code not in existing:
             existing[code] = Permission(code=code, module=module, description=desc)
             db.add(existing[code])
+            added.add(code)
     db.flush()
     for code, spec in DEFAULT_ROLES.items():
         role = db.execute(select(Role).where(Role.code == code)).scalar_one_or_none()
@@ -36,6 +38,10 @@ def seed_reference(db: Session) -> None:
             db.add(role)
         elif code == "admin":
             role.permissions = list(existing.values())  # admin always has everything
+        else:  # new permission introduced by an update → give it to the default roles that should have it
+            for c in added & set(spec["permissions"]):
+                if existing[c] not in role.permissions:
+                    role.permissions.append(existing[c])
     cs = get_company_settings(db)
     if not cs.address:
         cs.address = "Zone industrielle"

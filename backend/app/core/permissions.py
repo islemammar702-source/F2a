@@ -17,6 +17,7 @@ PERMISSIONS: dict[str, tuple[str, str]] = {
     "payments.view": ("payments", "Voir les paiements"),
     "payments.manage": ("payments", "Enregistrer / annuler les paiements"),
     "reports.view": ("reports", "Consulter les rapports financiers"),
+    "catalog.manage": ("catalog", "Gérer le catalogue matériel et les prix (import Excel)"),
     "settings.manage": ("settings", "Modifier les paramètres de l'entreprise"),
     "activity.view": ("activity", "Voir le journal d'activité"),
 }
@@ -31,6 +32,7 @@ DEFAULT_ROLES = {
         "permissions": [
             "dashboard.view", "clients.view", "clients.manage", "requests.view", "requests.manage",
             "quotes.view", "quotes.manage", "invoices.view", "invoices.manage", "payments.view", "activity.view",
+            "catalog.manage",
         ],
     },
     "accountant": {

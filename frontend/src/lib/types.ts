@@ -118,3 +118,9 @@ export type ScannedPayment = {
   invoice_number: string | null; payer_name: string | null; comment: string | null;
 };
 export type ScanResult<T = ScannedSales | ScannedPayment> = { document: DocumentFile; ai_enabled: boolean; engine: "claude" | "ocr" | null; extracted: T | null; ai_error: string | null };
+
+// ---------- Material / price catalogue ----------
+export type CatalogItem = {
+  id: string; reference: string; designation: string; unit: string; unit_price_ht: Money;
+  item_type: Line["item_type"]; category: string | null; tva_rate: Money | null; is_active: boolean;
+};

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, clients, dashboard, invoices, payments, portal, public, quotes, scans, settings as settings_routes, users
+from app.api.routes import auth, catalog, clients, dashboard, invoices, payments, portal, public, quotes, scans, settings as settings_routes, users
 from app.core.config import settings
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -54,7 +54,7 @@ async def integrity_handler(request: Request, exc: IntegrityError):
 
 API = "/api"
 for r in (auth.router, users.router, clients.router, quotes.router, invoices.router, payments.router,
-          dashboard.router, settings_routes.router, portal.router, public.router, scans.router):
+          dashboard.router, settings_routes.router, portal.router, public.router, scans.router, catalog.router):
     app.include_router(r, prefix=API)
 
 

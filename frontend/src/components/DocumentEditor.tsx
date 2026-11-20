@@ -7,6 +7,7 @@ import { addDaysISO, documentTotals, formatMoney, lineTotals, todayISO, toNumber
 import { useI18n } from "@/lib/i18n";
 import { useCompanySettings } from "@/lib/useSettings";
 import type { Client, DocumentFile, Line, Page, ScanResult, ScannedClient, ScannedSales } from "@/lib/types";
+import CatalogInput from "./CatalogInput";
 import ClientFormModal from "./ClientForm";
 import ScanImport from "./ScanImport";
 import { useToast } from "./Toast";
@@ -267,7 +268,12 @@ export default function DocumentEditor({
                 </div>
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-12">
                   <Field className="col-span-2 md:col-span-5" error={errors[`d${i}`]}>
-                    <Input placeholder={t("lines.designation")} value={l.designation} disabled={lockClientAndItems} onChange={(e) => setLine(i, { designation: e.target.value })} />
+                    <CatalogInput placeholder={t("lines.designationCatalog")} value={l.designation} disabled={lockClientAndItems}
+                      onChange={(val) => setLine(i, { designation: val })}
+                      onPick={(c) => setLine(i, {
+                        designation: c.designation, unit: c.unit, unit_price_ht: String(toNumber(c.unit_price_ht)), item_type: c.item_type,
+                        ...(c.tva_rate !== null && rates.includes(toNumber(c.tva_rate)) ? { tva_rate: String(toNumber(c.tva_rate)) } : {}),
+                      })} />
                   </Field>
                   <Field className="col-span-2 md:col-span-7">
                     <Input placeholder={`${t("lines.description")} (${t("common.optional")})`} value={l.description ?? ""} disabled={lockClientAndItems} onChange={(e) => setLine(i, { description: e.target.value })} />
