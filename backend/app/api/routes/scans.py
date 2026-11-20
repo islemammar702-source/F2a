@@ -17,7 +17,7 @@ from app.core.deps import client_ip, get_db, require_staff
 from app.models import Document, Invoice, Quote, User
 from app.schemas.system import DocumentOut
 from app.services.audit import log_activity
-from app.services.scan_ai import ScanError, ai_enabled, extract
+from app.services.scan_ai import ScanError, ai_enabled, engine, extract
 from app.services.storage import absolute_path, save_upload
 
 router = APIRouter(tags=["scan"])
@@ -45,6 +45,7 @@ def _target(target: str):
 class ScanOut(BaseModel):
     document: DocumentOut
     ai_enabled: bool
+    engine: str | None = None  # "claude" (AI) | "ocr" (free, offline)
     extracted: dict | None = None
     ai_error: str | None = None
 
@@ -66,7 +67,7 @@ async def scan(target: str, request: Request, file: UploadFile = File(...), db: 
             extracted = await run_in_threadpool(extract, absolute_path(doc).read_bytes(), doc.mime_type, target)
         except ScanError as e:
             err = str(e)
-    return ScanOut(document=DocumentOut.model_validate(doc), ai_enabled=ai_enabled(), extracted=extracted, ai_error=err)
+    return ScanOut(document=DocumentOut.model_validate(doc), ai_enabled=ai_enabled(), engine=engine(), extracted=extracted, ai_error=err)
 
 
 def _entity(db: Session, entity_type: str, entity_id: uuid.UUID):

@@ -117,4 +117,4 @@ export type ScannedPayment = {
   amount: string | null; payment_date: string | null; method: string | null; reference: string | null;
   invoice_number: string | null; payer_name: string | null; comment: string | null;
 };
-export type ScanResult<T = ScannedSales | ScannedPayment> = { document: DocumentFile; ai_enabled: boolean; extracted: T | null; ai_error: string | null };
+export type ScanResult<T = ScannedSales | ScannedPayment> = { document: DocumentFile; ai_enabled: boolean; engine: "claude" | "ocr" | null; extracted: T | null; ai_error: string | null };

@@ -73,12 +73,17 @@ prendre une photo avec le téléphone ou d'importer une image / un PDF :
 
 - le fichier original est **toujours conservé** (pièce jointe visible sur la fiche du devis / de la facture,
   ou justificatif du paiement) ;
-- si `ANTHROPIC_API_KEY` est renseignée dans `.env`, le document est **lu automatiquement** (client, lignes,
-  quantités, prix HT, TVA, dates, montant, mode de paiement…) et le formulaire est **pré-rempli** ;
-  vous vérifiez puis enregistrez. Les totaux sont toujours recalculés par le serveur.
-- sans clé, le scan est simplement joint et le formulaire se remplit à la main.
+- le document est **lu automatiquement** et le formulaire **pré-rempli** (client, dates, n°, lignes, montants,
+  mode de paiement, n° de chèque…) ; vous vérifiez puis enregistrez. Les totaux sont toujours recalculés par le serveur.
 
-Clé : créer un compte sur https://console.anthropic.com → *API Keys*, ajouter du crédit (facturation à l'usage,
+Deux moteurs de lecture :
+
+| Moteur | Coût | Précision |
+|---|---|---|
+| **OCR Tesseract** (par défaut, inclus dans l'image Docker) | gratuit, hors ligne, rien ne sort du serveur | bonne sur dates, montants, n° ; lignes de tableau gardées seulement si quantité × prix = total |
+| **Claude** (si `ANTHROPIC_API_KEY` est renseignée) | payant à l'usage | très précise, même photo de travers ou manuscrite |
+
+Clé Claude (optionnelle) : créer un compte sur https://console.anthropic.com → *API Keys*, ajouter du crédit (facturation à l'usage,
 quelques centimes par document), puis dans `.env` : `ANTHROPIC_API_KEY=sk-ant-...` et `docker compose up -d`.
 
 ### Mise en ligne sur un serveur (VPS) avec HTTPS

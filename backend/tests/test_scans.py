@@ -3,7 +3,7 @@ import io
 
 from PIL import Image
 
-from app.services import scan_ai
+from app.services import scan_ai, scan_ocr
 from tests.conftest import make_client, make_invoice, make_quote
 
 
@@ -17,8 +17,9 @@ def _upload(client, headers, target, data=None, mime="image/png", name="scan.png
     return client.post(f"/api/scan/{target}", files={"file": (name, data or _png(), mime)}, headers=headers)
 
 
-def test_scan_without_ai_key_only_stores_file(client, manager, monkeypatch):
+def test_scan_without_any_reader_only_stores_file(client, manager, monkeypatch):
     monkeypatch.setattr(scan_ai.settings, "ANTHROPIC_API_KEY", "")
+    monkeypatch.setattr(scan_ocr, "available", lambda: False)
     r = _upload(client, manager, "quote")
     assert r.status_code == 201, r.text
     body = r.json()
@@ -87,3 +88,48 @@ def test_scan_permissions(client, accountant, admin):
     assert r.status_code == 400
     r = client.post(f"/api/attachments/invoice/{inv['id']}", json={"document_ids": [doc["id"]]}, headers=admin)
     assert r.status_code == 200
+
+
+# ---------- free OCR reader: parsing rules (no Tesseract needed) ----------
+INVOICE_TEXT = """SOCIETE CLIMA PLUS
+Tél: 71222333 MF : 1234567A/M/000
+FACTURE N° FA-2025/118
+Date : 12/09/2025
+Client : Résidence Les Oliviers
+Tél : 98 765 432
+Objet : Installation climatisation bureaux
+Désignation Qté U PUHT Total HT
+Split mural 12000 BTU 2 u 1 250,500 2 501,000
+Tuyauterie cuivre 15 ml 18,000 270,000
+Main d'oeuvre pose 2 j 150,000 300,000
+Ligne illisible 3 u 10,000 99,000
+Total HT 3 071,000
+TVA 19 % 583,490
+Timbre fiscal 1,000
+Net à payer 3 655,490
+Date d'échéance : 12/10/2025
+"""
+
+
+def test_ocr_parse_invoice():
+    r = scan_ocr.parse_sales(INVOICE_TEXT, "invoice")
+    assert r["document_number"] == "FA-2025/118"
+    assert r["client"] == {"name": "Résidence Les Oliviers", "phone": "98765432", "email": None, "tax_id": None}
+    assert (r["issue_date"], r["second_date"]) == ("2025-09-12", "2025-10-12")
+    assert r["title"] == "Installation climatisation bureaux" and r["apply_stamp_duty"] is True
+    assert r["total_ttc"] == "3655.490"
+    # inconsistent line (3 × 10 ≠ 99) is dropped
+    assert [(i["designation"], i["quantity"], i["unit"], i["unit_price_ht"], i["item_type"]) for i in r["items"]] == [
+        ("Split mural 12000 BTU", "2", "u", "1250.500", "material"),
+        ("Tuyauterie cuivre", "15", "ml", "18.000", "material"),
+        ("Main d'oeuvre pose", "2", "j", "150.000", "labor"),
+    ]
+    assert all(i["tva_rate"] == "19" for i in r["items"])
+
+
+def test_ocr_parse_payment_and_money():
+    r = scan_ocr.parse_payment("CHEQUE N° 4587123\nMontant : 1 500,000 DT\nTunis, le 03/11/2026\nRèglement facture FAC-2026-014")
+    assert r == {"amount": "1500.000", "payment_date": "2026-11-03", "method": "cheque", "reference": "4587123",
+                 "invoice_number": "FAC-2026-014"}
+    assert [str(scan_ocr.parse_money(x)) for x in ["1 250,500", "1.250,500", "1,250.5", "18,000", "300"]] == \
+        ["1250.500", "1250.500", "1250.5", "18.000", "300"]

@@ -1,9 +1,10 @@
-"""Read a scanned / photographed quote, invoice or payment receipt with Claude (Anthropic API)
-and return structured data used to pre-fill the forms.
+"""Read a scanned / photographed quote, invoice or payment receipt and return structured data used
+to pre-fill the forms. Two engines:
+- "claude": Claude (Anthropic API), very precise, paid per use — when ANTHROPIC_API_KEY is set;
+- "ocr": Tesseract OCR, free and offline (default, see scan_ocr.py), less precise on table lines.
 
 The result is only a SUGGESTION: the user reviews it in the form, and the server recomputes and
 validates everything on save exactly as for manual entry. Nothing is saved from here.
-Disabled (returns None) when ANTHROPIC_API_KEY is not configured.
 """
 import base64
 import io
@@ -15,6 +16,7 @@ from decimal import Decimal, InvalidOperation
 import httpx
 
 from app.core.config import settings
+from app.services import scan_ocr
 
 log = logging.getLogger("f2a.scan")
 
@@ -27,8 +29,16 @@ class ScanError(Exception):
     """Raised with a short code shown to the user (errors.<code>)."""
 
 
+def engine() -> str | None:
+    if settings.ANTHROPIC_API_KEY:
+        return "claude"
+    if scan_ocr.available():
+        return "ocr"
+    return None
+
+
 def ai_enabled() -> bool:
-    return bool(settings.ANTHROPIC_API_KEY)
+    return engine() is not None
 
 
 # ---------- JSON schemas given to the model (tool input) ----------
@@ -229,10 +239,18 @@ def _clean_payment(raw: dict) -> dict:
 
 
 def extract(data: bytes, mime: str, target: str) -> dict | None:
-    """Return cleaned data, or None when the AI reader is not configured."""
-    if not ai_enabled():
+    """Return cleaned data, or None when no reader is available."""
+    eng = engine()
+    if eng is None:
         return None
-    raw = _call_claude(data, mime, target)
+    if eng == "claude":
+        raw = _call_claude(data, mime, target)
+    else:
+        try:
+            raw = scan_ocr.read(data, mime, target)
+        except Exception as e:  # OCR crash / timeout: the file is kept anyway
+            log.warning("OCR failed: %s", e)
+            raise ScanError("scan_ocr_failed") from e
     if not isinstance(raw, dict):
         raise ScanError("scan_ai_failed")
     return _clean_payment(raw) if target == "payment" else _clean_sales(raw)

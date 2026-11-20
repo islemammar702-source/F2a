@@ -1,6 +1,10 @@
 FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
+# Free offline reading of scanned documents: Tesseract OCR (French + Arabic) and PDF tools
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-fra tesseract-ocr-ara poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
 RUN useradd --create-home --uid 1000 f2a
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

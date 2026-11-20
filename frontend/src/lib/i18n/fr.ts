@@ -190,6 +190,7 @@ const fr = {
     hint: "Photo avec le téléphone, image ou PDF : les informations sont lues et le formulaire est rempli automatiquement.",
     photo: "Prendre une photo", file: "Importer image / PDF", reading: "Lecture du document en cours… (jusqu'à 30 secondes)",
     readOk: "Document lu : le formulaire est pré-rempli. Vérifiez avant d'enregistrer.",
+    readOcr: "Document lu (lecture gratuite) : vérifiez surtout le client et les lignes, et complétez ce qui manque.",
     attachedOnly: "Fichier joint. Lecture automatique non activée : remplissez le formulaire.",
     fileKept: "Le fichier est quand même joint.", checkBeforeSave: "Données lues automatiquement : vérifiez le client, les lignes et les montants avant d'enregistrer.",
     totalMismatch: "Attention : total lu sur le document {read} ≠ total calculé {computed}.",
@@ -198,7 +199,7 @@ const fr = {
     attachments: "Documents scannés", none: "Aucun document joint.", added: "Document ajouté.", confirmDelete: "Supprimer ce document joint ?",
   },
   errors: {
-    scan_ai_unreachable: "Service de lecture injoignable (connexion internet du serveur ?).", scan_ai_bad_key: "Clé de lecture automatique (ANTHROPIC_API_KEY) invalide.", scan_ai_busy: "Service de lecture occupé, réessayez dans un instant.", scan_ai_failed: "Le document n'a pas pu être lu automatiquement.", invalid_attachment: "Ce document ne peut pas être joint ici.",
+    scan_ai_unreachable: "Service de lecture injoignable (connexion internet du serveur ?).", scan_ai_bad_key: "Clé de lecture automatique (ANTHROPIC_API_KEY) invalide.", scan_ai_busy: "Service de lecture occupé, réessayez dans un instant.", scan_ai_failed: "Le document n'a pas pu être lu automatiquement.", scan_ocr_failed: "La lecture du document a échoué (photo floue ou trop sombre ?).", invalid_attachment: "Ce document ne peut pas être joint ici.",
     invalid_credentials: "Email ou mot de passe incorrect.", too_many_attempts: "Trop de tentatives. Réessayez dans quelques minutes.",
     account_disabled: "Ce compte est désactivé.", forbidden: "Vous n'avez pas l'autorisation d'effectuer cette action.",
     not_found: "Élément introuvable.", validation_error: "Certains champs sont invalides.", email_taken: "Cette adresse email est déjà utilisée.",

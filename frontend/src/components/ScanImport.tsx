@@ -38,7 +38,7 @@ export default function ScanImport<T>({ target, onResult, compact = false }: {
       const fd = new FormData();
       fd.append("file", f);
       const r = await api<ScanResult<T>>(`/scan/${target}`, { method: "POST", form: fd });
-      if (r.extracted) setStatus({ ok: true, text: t("scan.readOk") });
+      if (r.extracted) setStatus({ ok: true, text: t(r.engine === "ocr" ? "scan.readOcr" : "scan.readOk") });
       else if (r.ai_error) setStatus({ ok: false, text: `${t(`errors.${r.ai_error}`)} ${t("scan.fileKept")}` });
       else setStatus({ ok: true, text: t("scan.attachedOnly") });
       onResult(r);
